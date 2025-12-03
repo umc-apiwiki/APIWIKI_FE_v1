@@ -1,13 +1,20 @@
-name: Docker Frontend
-on: [push: main]
+name: Docker Backend
+on:
+  push:
+    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with: { node-version: '18' }
-    - run: npm ci && npm run build
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - run: mvn clean package -DskipTests
     - uses: docker/login-action@v3
       with:
         registry: ghcr.io
