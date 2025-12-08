@@ -26,10 +26,17 @@ npm run lint       # ESLint 검사
 
 ## 배포
 
-멀티 스테이지 Dockerfile이 Node 22 Alpine 이미지를 사용해 빌드와 서빙을 모두 처리합니다.
+Coolify에서 바로 사용할 수 있도록 Dockerfile을 단일 스테이지로 단순화했습니다.
 
-- 1단계: `npm install` 후 `npm run build`로 `dist` 생성.
-- 2단계: `dist`와 `node_modules`만 복사해 경량 런타임을 만들고, `npm run preview -- --host 0.0.0.0 --port ${PORT:-4173}`로 SPA를 서빙.
-- 컨테이너는 기본적으로 `4173` 포트를 노출하며, Coolify 등에서 `PORT` 환경 변수를 주입하면 해당 값을 그대로 사용합니다.
+- Node 22 Alpine 기반으로 `npm ci` → `npm run build`까지 모두 컨테이너 내부에서 실행합니다.
+- 런타임은 같은 컨테이너에서 `npm run preview -- --host 0.0.0.0 --port ${PORT:-4173}` 명령을 사용합니다.
+- `vite.config.ts`의 `preview.allowedHosts`에 `apiwiki.supabin.com`을 등록해 커스텀 도메인 접근을 허용했습니다.
+- 기본 노출 포트는 `4173`이며, Coolify에서 `PORT` 환경 변수를 지정하면 그대로 사용합니다.
 
-배포 시에는 `npm run build` → Docker 이미지 빌드 → 이미지 푸시 → Coolify 서비스 업데이트 순으로 진행하면 됩니다.
+배포 순서 (Coolify Git-to-Container 기준)
+
+1. main 브랜치에 변경사항 push
+2. Coolify가 리포지토리를 클론하고 Dockerfile 기반으로 빌드
+3. 빌드 완료 후 자동으로 새 컨테이너가 뜨고, `apiwiki.supabin.com`에서 서비스 확인
+
+추가적인 GitHub Actions나 외부 레지스트리 푸시는 더 이상 필요하지 않습니다.
