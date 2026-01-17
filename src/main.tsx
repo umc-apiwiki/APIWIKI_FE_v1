@@ -5,6 +5,8 @@ import './index.css'
 import App from './App.tsx'
 
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN
+const umamiUrl = import.meta.env.VITE_UMAMI_URL
+const umamiWebsiteId = import.meta.env.VITE_UMAMI_WEBSITE_ID
 
 if (sentryDsn) {
   Sentry.init({
@@ -18,6 +20,17 @@ if (sentryDsn) {
 } else {
   // 빌드/배포 시점에 DSN이 비어 있으면 SDK가 초기화되지 않음
   console.warn('Sentry disabled: VITE_SENTRY_DSN is missing')
+}
+
+if (umamiUrl && umamiWebsiteId) {
+  const umami = document.createElement('script')
+  umami.src = umamiUrl
+  umami.async = true
+  umami.defer = true
+  umami.dataset.websiteId = umamiWebsiteId
+  document.head.appendChild(umami)
+} else {
+  console.warn('Umami disabled: VITE_UMAMI_URL or VITE_UMAMI_WEBSITE_ID is missing')
 }
 
 createRoot(document.getElementById('root')!).render(
