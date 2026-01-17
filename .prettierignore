@@ -1,0 +1,7 @@
+node_modules
+dist
+.history
+coverage
+.vscode
+.idea
+*.log
