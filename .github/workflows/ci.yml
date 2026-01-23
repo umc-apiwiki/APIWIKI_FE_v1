@@ -1,0 +1,89 @@
+name: Vite CI
+
+on:
+  push:
+    branches: [ main ] # 메인 브랜치에 푸시될 때 실행
+  pull_request:
+    branches: [ main ] # PR이 생성될 때 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 소스 코드 가져오기
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Node.js 환경 설정
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm' # 캐시를 사용하여 설치 속도 향상
+
+      # 3. 의존성 설치
+      - name: Install dependencies
+        run: npm ci # package-lock.json을 기준으로 엄격하게 설치
+
+      # 4. Prettier 검사
+      - name: Check Prettier format
+        run: npm run format:check
+
+      # 5. ESLint 검사
+      - name: Run ESLint
+        run: npm run lint
+
+      # 6. Vite 빌드 테스트 (선택 사항이지만 권장)
+      - name: Build project
+        run: npm run build
+
+      # 7. CI 성공 알림
+      - name: ✅ Send CI Success
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{
+              "embeds": [{
+                "title": "✅ CI 체크 완료!",
+                "description": "Prettier, ESLint, Build 모두 통과\n📁 ${{ github.repository }}",
+                "color": 65280,
+                "fields": [{
+                  "name": "브랜치",
+                  "value": "`${{ github.ref_name }}`",
+                  "inline": true
+                }, {
+                  "name": "커밋",
+                  "value": "`${{ github.sha }}`",
+                  "inline": true
+                }],
+                "timestamp": "${{ github.event.created_at }}"
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      # 8. CI 실패 알림
+      - name: ❌ Send CI Failure
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{
+              "embeds": [{
+                "title": "❌ CI 체크 실패!",
+                "description": "Prettier, ESLint, 또는 Build 단계에서 오류 발생\n📁 ${{ github.repository }}",
+                "color": 16711680,
+                "fields": [{
+                  "name": "브랜치",
+                  "value": "`${{ github.ref_name }}`",
+                  "inline": true
+                }, {
+                  "name": "커밋",
+                  "value": "`${{ github.sha }}`",
+                  "inline": true
+                }],
+                "timestamp": "${{ github.event.created_at }}"
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
