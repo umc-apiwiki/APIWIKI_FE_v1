@@ -1,5 +1,4 @@
 import APICard from "@/components/APICard"
-import APICardSmall from "@/components/APICardSmall"
 import SearchBar from "@/components/HomePage/SearchBar"
 import { useState } from "react"
 
@@ -10,8 +9,6 @@ interface APICardProps {
   price: string
   iconUrl: string
   description?: string
-  isDetail?: boolean
-  isLarge?: boolean
 }
 
 const ExplorePage = () => {
@@ -23,8 +20,6 @@ const ExplorePage = () => {
             price: "Paid",
             iconUrl: "string",
             description: "구글의 최신 멀티모달 AI 모델을 활용해 텍스트, 코드, 이미지 처리 기능을 제공합니다.",
-            isDetail: true,
-            isLarge: true,
         }
     ]
     const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -43,22 +38,6 @@ const ExplorePage = () => {
                     price={cat.price}
                     iconUrl={cat.iconUrl}
                     description={cat.description}
-                    isDetail={cat.isDetail}
-                    isLarge={cat.isLarge}
-                />
-            ))}
-        </div>
-        <div className='m-10 '>
-            {apies.map((cat) => (
-                <APICardSmall
-                    title={cat.title}
-                    star={cat.star}
-                    usedBy={cat.usedBy}
-                    price={cat.price}
-                    iconUrl={cat.iconUrl}
-                    description={cat.description}
-                    isDetail={cat.isDetail}
-                    isLarge={cat.isLarge}
                 />
             ))}
         </div>

@@ -1,6 +1,3 @@
-import HeartLine from '@/assets/icons/common/ic_heart_line.svg'
-
-
 interface APICardProps {
   title: string
   star: string
@@ -8,8 +5,6 @@ interface APICardProps {
   price: string
   iconUrl: string
   description?: string
-  isDetail?: boolean
-  isLarge?: boolean
 }
 
 export default function APICardSmall({
@@ -18,7 +13,6 @@ export default function APICardSmall({
   usedBy,
   price,
   iconUrl,
-  description,
 }: APICardProps) {
   return (
     <div className="group relative w-[300px] h-36 flex-shrink-0 cursor-pointer">

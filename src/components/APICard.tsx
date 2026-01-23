@@ -21,9 +21,9 @@ export default function APICard({
   description,
 }: APICardProps) {
   return (
-    <div className="group relative w-96 h-64 flex-shrink-0 cursor-pointer">
+    <div className="group relative w-96 h-64 flex-shrink-0 cursor-pointer ">
       {/* 카드 배경(테두리 + 그림자 + 배경색) */}
-      <div className="absolute inset-0 rounded-[15px] border-brand-500/30 border-thin bg-white shadow-[1px_5px_10px_0px_var(--tw-shadow-color)] shadow-brand-500/25" />
+      <div className="absolute inset-0 rounded-[15px] border-brand-500/30 border-thin bg-white shadow-[1px_5px_10px_0px_var(--tw-shadow-color)] shadow-brand-500/25 group-hover:bg-gradient-to-b group-hover:from-brand-500/50 group-hover:to-white transition-all duration-300" />
       {/* 하트 */}
       <div className='relative'>
         <button type='button' className='absolute top-3 right-4 z-10'>
