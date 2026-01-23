@@ -9,6 +9,8 @@ interface APICardProps {
   price: string
   iconUrl: string
   description?: string
+  isDetail?: boolean
+  isLarge?: boolean
 }
 
 export default function APICard({

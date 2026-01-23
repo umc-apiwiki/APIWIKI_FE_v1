@@ -1,15 +1,20 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import SearchLine from '@/assets/icons/action/ic_search_line.svg'
 import SearchHistory from '@/assets/icons/common/ic_search_history.svg'
 import Cancel from '@/assets/icons/common/ic_cancel.svg'
 
 type SearchBarProps = {
-  isOpen: boolean
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
+  isOpen?: boolean
+  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>
   isMain?: boolean // 홈페이지 여부
 }
 
 export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchBarProps) {
+  // Allow uncontrolled mode when props are not provided
+  const [internalOpen, setInternalOpen] = useState(false)
+  const controlled = typeof isOpen === 'boolean' && typeof setIsOpen === 'function'
+  const openState = controlled ? isOpen : internalOpen
+  const setOpen = controlled ? setIsOpen : setInternalOpen
   const containerRef = useRef<HTMLDivElement>(null)
 
   const recentSearches = ['AWS API', '네이버지도 API', '강아지 앱 API', '게임 앱 API']
@@ -17,7 +22,7 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchB
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+        setOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -39,7 +44,7 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchB
                 fixed left-1/2 -translate-x-1/2
                 transition-all duration-300 ease-in-out
                 ${
-                  isOpen
+                  openState
                     ? 'top-1/2 -translate-y-1/2 w-[876px] h-[500px] z-50'
                     : 'top-[60%] -translate-y-1/2 w-[876px] h-14 z-30'
                 }
@@ -48,7 +53,7 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchB
               : `
                 absolute top-0 left-0 w-full
                 rounded-[34px] border z-30
-                ${isOpen ? 'h-[500px]' : 'h-14'}
+                ${openState ? 'h-[500px]' : 'h-14'}
               `
           }
 
@@ -59,7 +64,7 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchB
             type="text"
             className="w-full h-full text-lg text-[#071E31] font-medium font-sans placeholder:text-slate-400 outline-none bg-transparent ml-1"
             placeholder="궁금한 API를 검색해보세요"
-            onFocus={() => setIsOpen(true)}
+            onFocus={() => setOpen(true)}
           />
 
           <div className="w-6 h-6 flex items-center justify-center cursor-pointer ml-4">
@@ -70,7 +75,7 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchB
         </div>
 
         <div
-          className={`w-full p-2 px-[10px] flex flex-col gap-1 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full p-2 px-[10px] flex flex-col gap-1 transition-opacity duration-300 ${openState ? 'opacity-100' : 'opacity-0'}`}
         >
           <span className="font-sans font-medium text-lg text-brand-800 tracking-[-1px] px-[20px] p-0">
             Recent
