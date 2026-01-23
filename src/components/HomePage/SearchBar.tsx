@@ -31,11 +31,11 @@ export default function SearchBar({ isOpen, setIsOpen }: SearchBarProps) {
     <div
       ref={containerRef}
       className={`
-        relative mx-auto bg-white overflow-hidden transition-all duration-300 ease-in-out z-50
-        w-[876px] shadow-[1px_1px_5px_2px_rgba(33,150,243,0.25)] border-brand-500/25
+        relative mx-auto bg-white overflow-hidden transition-all duration-300 ease-in-out z-30
+        w-[876px] shadow-[1px_1px_5px_2px_var(--tw-shadow-color)] shadow-brand-500/25 border-brand-500/25
         ${
           isOpen
-            ? 'h-[500px] rounded-[20px] border'
+            ? 'h-[500px] rounded-[34px] border'
             : 'h-14 rounded-[34px] border' // 닫혔을 때
         }
       `}
