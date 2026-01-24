@@ -634,23 +634,12 @@ export default function HomePage2() {
   ]
 
   // 검색 태그 목록
-  const searchTags = [
-    '결제',
-    '소셜로그인',
-    '지도',
-    '날씨',
-    'AI',
-    '이메일',
-    '금융',
-    '데이터',
-  ]
+  const searchTags = ['결제', '소셜로그인', '지도', '날씨', 'AI', '이메일', '금융', '데이터']
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_center,_#f0f7ff_0%,_#ffffff_100%)] pt-20 flex flex-col items-center overflow-x-hidden pb-40">
       <section className="flex flex-col items-center mb-24 w-full">
-        <h1 className="text-8xl font-bold text-slate-900 mb-10 tracking-tight">
-          API Wiki
-        </h1>
+        <h1 className="text-8xl font-bold text-slate-900 mb-10 tracking-tight">API Wiki</h1>
         <SearchBar />
       </section>
 
@@ -696,7 +685,7 @@ export default function HomePage2() {
                 <APICard key={item.id} {...item} />
               ) : (
                 <APICardSmall key={item.id} {...item} />
-              ),
+              )
             )}
           </div>
         </section>
