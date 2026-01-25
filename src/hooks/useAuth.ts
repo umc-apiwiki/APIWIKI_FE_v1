@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { signup, login, logout, getCurrentUser } from '@/services'
-import type { SignupRequest, LoginRequest, LoginResponse } from '@/types/api'
+import type { SignupRequest, LoginRequest } from '@/types/api'
 
 interface AuthState {
   memberId: number | null

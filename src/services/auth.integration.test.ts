@@ -15,7 +15,6 @@ import { signup, login, logout } from '@/services'
 describe('Auth API - 실제 서버 연동', () => {
   const TEST_EMAIL = 'test@apiwiki.com'
   const TEST_PASSWORD = 'Test1234!'
-  const TEST_NICKNAME = 'TestUser'
 
   beforeEach(() => {
     localStorage.clear()

@@ -75,7 +75,11 @@ describe('useApi Hook', () => {
       axiosError.response = {
         status: 400,
         data: { message: 'Bad Request' },
-      } as any
+        statusText: 'Bad Request',
+        headers: {},
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        config: {} as any,
+      }
 
       await act(async () => {
         const response = await result.current.execute(() => Promise.reject(axiosError))

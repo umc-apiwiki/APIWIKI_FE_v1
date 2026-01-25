@@ -8,10 +8,13 @@ export const signup = async (data: SignupRequest): Promise<ApiResponse<LoginResp
   try {
     const response = await api.post('/api/v1/auth/signup', data)
     return response.data
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 서버가 400 에러로 응답한 경우에도 response.data 반환
-    if (error.response?.data) {
-      return error.response.data
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { data?: ApiResponse<LoginResponse> } }
+      if (axiosError.response?.data) {
+        return axiosError.response.data
+      }
     }
     throw error
   }
@@ -33,10 +36,13 @@ export const login = async (data: LoginRequest): Promise<ApiResponse<LoginRespon
     }
 
     return result
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 서버가 400 에러로 응답한 경우에도 response.data 반환
-    if (error.response?.data) {
-      return error.response.data
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { data?: ApiResponse<LoginResponse> } }
+      if (axiosError.response?.data) {
+        return axiosError.response.data
+      }
     }
     throw error
   }
@@ -58,10 +64,13 @@ export const logout = async (): Promise<ApiResponse<string>> => {
     }
 
     return result
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 서버가 400 에러로 응답한 경우에도 response.data 반환
-    if (error.response?.data) {
-      return error.response.data
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { data?: ApiResponse<string> } }
+      if (axiosError.response?.data) {
+        return axiosError.response.data
+      }
     }
     throw error
   }
