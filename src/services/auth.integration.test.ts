@@ -3,12 +3,12 @@ import { signup, login, logout } from '@/services'
 
 /**
  * Auth API 실제 서버 연동 테스트
- * 
+ *
  * ⚠️ 주의사항:
  * 1. 테스트 전용 계정이 필요합니다
  * 2. 회원가입은 중복 방지를 위해 주석 처리되어 있습니다
  * 3. 개발 서버에 테스트 계정을 미리 생성해주세요
- * 
+ *
  * 실행 방법:
  * npm test auth.integration.test.ts
  */
@@ -38,13 +38,13 @@ describe('Auth API - 실제 서버 연동', () => {
       console.log('✅ 회원가입 응답:', result)
 
       expect(result.isSuccess).toBeDefined()
-      
+
       if (result.isSuccess) {
         expect(result.result).toBeDefined()
         expect(result.result?.accessToken).toBeDefined()
         expect(result.result?.memberId).toBeDefined()
         expect(result.result?.nickname).toBeDefined()
-        
+
         console.log('✅ 회원가입 성공!')
         console.log('   - memberId:', result.result?.memberId)
         console.log('   - nickname:', result.result?.nickname)
@@ -110,7 +110,7 @@ describe('Auth API - 실제 서버 연동', () => {
     // 실패 응답이어야 함
     expect(result.isSuccess).toBe(false)
     expect(result.message).toBeDefined()
-    
+
     console.log('✅ 로그인 실패 케이스 정상 처리됨')
   }, 10000)
 
@@ -135,7 +135,7 @@ describe('Auth API - 실제 서버 연동', () => {
 
     if (result.isSuccess) {
       console.log('✅ 로그아웃 성공!')
-      
+
       // localStorage가 정리되었는지 확인
       expect(localStorage.getItem('accessToken')).toBeNull()
       expect(localStorage.getItem('memberId')).toBeNull()

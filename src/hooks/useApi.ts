@@ -11,7 +11,7 @@ interface ApiState<T> {
  * 공용 API 호출 로직
  * 로딩, 에러, 데이터 상태 자동 관리
  */
-export const useApi = <T = unknown,>() => {
+export const useApi = <T = unknown>() => {
   const [state, setState] = useState<ApiState<T>>({
     data: null,
     isLoading: false,
@@ -42,9 +42,7 @@ export const useApi = <T = unknown,>() => {
 
         if (err instanceof AxiosError) {
           errorMessage =
-            err.response?.data?.message ||
-            err.message ||
-            '네트워크 오류가 발생했습니다.'
+            err.response?.data?.message || err.message || '네트워크 오류가 발생했습니다.'
         } else if (err instanceof Error) {
           errorMessage = err.message
         }
