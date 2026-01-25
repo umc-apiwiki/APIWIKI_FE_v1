@@ -28,7 +28,7 @@ describe('Auth API - 실제 서버 연동', () => {
   it('회원가입 - 이미 존재하면 패스', async () => {
     const result = await signup({
       email: TEST_EMAIL,
-        password: 'Testuser123', // 영문+숫자 조합 8자 이상
+      password: 'Testuser123', // 영문+숫자 조합 8자 이상
       nickname: TEST_NICKNAME,
     })
     console.log('✅ 회원가입 응답:', result)
@@ -65,7 +65,7 @@ describe('Auth API - 실제 서버 연동', () => {
   it('로그인 - 회원가입 유저로 성공', async () => {
     const result = await login({
       email: TEST_EMAIL,
-        password: 'Testuser123', // 회원가입과 동일한 비밀번호 사용
+      password: 'Testuser123', // 회원가입과 동일한 비밀번호 사용
     })
     console.log('✅ 로그인 응답:', {
       isSuccess: result.isSuccess,
