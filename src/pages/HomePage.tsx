@@ -11,7 +11,6 @@ const HomePage = () => {
     // 홈화면
     <div className="flex flex-col items-center justify-center">
       <div className="relative w-full h-[calc(100vh-200px)] flex flex-col items-center justify-center gap-8">
-        
         {/* 로고와 소개글*/}
         {!isSearchOpen && <IntroSection />}
 
