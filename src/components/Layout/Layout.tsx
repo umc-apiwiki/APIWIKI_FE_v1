@@ -6,6 +6,8 @@ const Layout = () => {
     <div>
       <Header />
       <main>
+        {/* 배경 원 */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-brand-500/50 rounded-full blur-[200px]" />
         <Outlet />
       </main>
     </div>
