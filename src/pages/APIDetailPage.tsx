@@ -37,9 +37,9 @@ export default function APIDetailPage() {
           {/* 아이콘과 텍스트가 가로로 배치되는 영역 */}
           <div className="flex justify-between mx-auto items-center">
             <div className="flex flex-col justify-center gap-2 mt-3 w-full md:w-auto">
-              <h1 className="font-semibold text-[50px] text-[#071E31] mb-10">{api?.title}</h1>
-              <p className="font-medium text-2xl text-[#0D3C61]">Star {api?.star}</p>
-              <p className="font-medium text-2xl text-[#0D3C61] mb-4">Used by {api?.usedBy}</p>
+              <h1 className="font-semibold text-[50px] text-info-darker mb-10">{api?.title}</h1>
+              <p className="font-medium text-2xl text-info-dark">Star {api?.star}</p>
+              <p className="font-medium text-2xl text-info-dark mb-4">Used by {api?.usedBy}</p>
               <p className="font-normal text-xl text-[#B0B0B0]">{api?.price}</p>
             </div>
             {/* api 이미지 */}
@@ -71,18 +71,18 @@ export default function APIDetailPage() {
                   onClick={() => setActiveMenu(key)}
                   className={`
                                 relative pb-3 text-2xl transition-colors
-                                ${activeMenu === key ? 'text-[#0D3C61]' : 'text-[#B0B0B0]'}
+                                ${activeMenu === key ? 'text-info-dark' : 'text-[#B0B0B0]'}
                                 `}
                 >
                   {label}
                   {activeMenu === key && (
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-full h-[1px] bg-[#0D3C61]/80" />
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-full h-[1px] bg-info-dark/80" />
                   )}
                 </button>
               ))}
             </div>
             {/* 내용물 */}
-            <div className="m-2">
+            <div>
               {activeMenu === 'A' && <OverviewSection />}
 
               {activeMenu === 'B' && <PricingSection />}
