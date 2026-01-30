@@ -9,7 +9,7 @@ const Category = ({ category }: CategoryTagProps) => {
       className="h-[40px]
         w-auto
         bg-white
-        border border-brand-500/25
+        border border-brand-500/50
         rounded-[20px]
         flex items-center justify-center
         px-4

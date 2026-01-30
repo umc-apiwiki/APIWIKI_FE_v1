@@ -14,7 +14,7 @@ export default function APICardSmall({ title, star, usedBy, price, iconUrl }: AP
           <div className="flex items-center justify-center flex-shrink-0">
             <div className="w-[70px] h-[70px] rounded-[10px] overflow-hidden flex-shrink-0 bg-white border border-brand-500/50">
               {/* 아이콘 이미지 */}
-              <img src={iconUrl} alt={title} />
+              <img src={iconUrl} alt={title} className="w-full h-full object-contain " />
             </div>
           </div>
 

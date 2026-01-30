@@ -10,6 +10,7 @@ import ReviewSection from '@/components/APIDetail/ReviewSection'
 import CodeExampleSection from '@/components/APIDetail/CodeExampleSection'
 import { useBookmark } from '@/context/BookmarkContext'
 import { apiData } from '@/data/mockData'
+import APICardSmall from '@/components/APICardSmall'
 
 const MENUS = [
   { key: 'A', label: '개요' },
@@ -31,7 +32,7 @@ export default function APIDetailPage() {
   return (
     <div className="mx-auto px-16 mt-32 2xl:mx-44">
       {/* 메인 영역 */}
-      <div className="">
+      <div className="p-5">
         {/* api 상세정보 + 이미지 */}
         <div className="mb-28">
           {/* 아이콘과 텍스트가 가로로 배치되는 영역 */}
@@ -92,8 +93,23 @@ export default function APIDetailPage() {
               {activeMenu === 'D' && <CodeExampleSection />}
             </div>
           </div>
+          {/* API 위키 */}
+          <div>
+            <span className="font-sans font-medium text-2xl text-info-dark">API 위키</span>
+            <div className="w-full max-w-[1112px] h-[580px] bg-white border border-brand-500 rounded-xl mt-3 mb-10" />
+          </div>
           {/* 비슷한 api */}
-          <div></div>
+          <div>
+            <div className="mb-6">
+              <span className="text-2xl font-medium text-info-dark">비슷한 API</span>
+            </div>
+
+            <div className="flex gap-10 overflow-hidden pb-20">
+              {apiData.map((data) => (
+                <APICardSmall key={data.id} {...data} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
