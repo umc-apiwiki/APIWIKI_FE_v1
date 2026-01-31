@@ -1,4 +1,6 @@
 import Review from './Review'
+import StarFilled from '@/assets/icons/common/ic_star_filled.svg'
+import StarEmpty from '@/assets/icons/common/ic_star_empty.svg'
 
 interface RatingData {
   score: number // 별점 (5, 4, 3, 2, 1)
@@ -9,6 +11,42 @@ interface RatingSummary {
   averageScore: number // 평균 점수 (예: 4.7)
   totalCount: number // 전체 리뷰 개수 (예: 1022)
   ratings: RatingData[]
+}
+const MAX_SCORE = 5
+
+function PartialStar({ ratio }: { ratio: number }) {
+  return (
+    <div className="relative w-6 h-6">
+      {/* 바닥에 깔리는 빈 별 */}
+      <img src={StarEmpty} className="absolute inset-0 w-6 h-6" />
+
+      {/* 비율에 따라 너비가 결정되는 컨테이너 */}
+      <div className="absolute inset-0 overflow-hidden" style={{ width: `${ratio * 100}%` }}>
+        {/* 채워진 별의 크기를 부모와 동일하게 고정하여 잘림 방지 */}
+        <img src={StarFilled} className="w-6 h-6 max-w-none" />
+      </div>
+    </div>
+  )
+}
+
+function StarRating({ score }: { score: number }) {
+  return (
+    <div className="flex">
+      {Array.from({ length: MAX_SCORE }).map((_, idx) => {
+        const diff = score - idx
+
+        if (diff >= 1) {
+          return <img key={idx} src={StarFilled} className="w-6 h-6" />
+        }
+
+        if (diff > 0) {
+          return <PartialStar key={idx} ratio={diff} />
+        }
+
+        return <img key={idx} src={StarEmpty} className="w-6 h-6" />
+      })}
+    </div>
+  )
 }
 
 export default function ReviewSection() {
@@ -48,14 +86,18 @@ export default function ReviewSection() {
           {/* 별점 */}
           <div className="flex flex-col justify-center items-center h-full">
             {/* 평점 */}
-            <div>
-              <span className="font-normal text-black text-[64px] leading-tight">4.7</span>
-            </div>
+            <span className="font-normal text-black text-[64px] leading-tight">
+              {data.averageScore.toFixed(1)}
+            </span>
             {/* 별 아이콘 */}
-            <div className="text-xl">별 별 별 별 별</div>
+            <div className="mt-1">
+              <StarRating score={data.averageScore} />
+            </div>
             {/* 리뷰 갯수 */}
             <div>
-              <span className="font-medium text-[#a4a4a4] text-[22px] leading-snug">1.022개</span>
+              <span className="font-medium text-[#a4a4a4] text-[22px] leading-snug">
+                {data.totalCount.toLocaleString()}개
+              </span>
             </div>
           </div>
           {/* 막대 그래프 */}
