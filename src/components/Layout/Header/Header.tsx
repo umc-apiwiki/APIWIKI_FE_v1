@@ -1,15 +1,30 @@
 import { Link } from 'react-router-dom'
 import HomeLogo from '@/assets/icons/navigation/ic_home_logo.svg'
 import { useEffect, useRef, useState } from 'react'
-import profileImg from '@/assets/default_profile.png'
+// import profileImg from '@/assets/default_profile.png'
+import SignInModal from '@/components/modal/SignInModal'
+import SignUpModal from '@/components/modal/SignUpModal'
+
+type User = {
+  name: string
+  profileImg: string
+}
 
 const Header = () => {
-  const user = {
-    name: 'nongbu',
-    profileImg: profileImg,
-  }
   const [isOpen, setIsOpen] = useState(false)
+  const [user] = useState<User | null>(null)
+  const [isSignInOpen, setIsSignInOpen] = useState(false)
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+  const switchToSignUp = () => {
+    setIsSignUpOpen(true)
+    setIsSignInOpen(false)
+  }
+  const switchToSignIn = () => {
+    setIsSignUpOpen(false)
+    setIsSignInOpen(true)
+  }
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -49,7 +64,7 @@ const Header = () => {
         </div>
 
         {/* 중앙 메뉴 */}
-        <div className="flex justify-self-center sm:gap-12 md:gap-16 lg:gap-36 whitespace-nowrap font-sans text-xl font-medium tracking-[-1px] text-[#0D3C61] pr-2">
+        <div className="flex justify-self-center sm:gap-12 md:gap-16 lg:gap-36 whitespace-nowrap font-sans text-xl font-medium tracking-[-1px] text-info-dark pr-2">
           <Link to="/bookmark" className="hover:text-brand-500">
             Bookmark
           </Link>
@@ -62,10 +77,15 @@ const Header = () => {
         </div>
 
         {/* 우측 로그인 버튼 영역*/}
-        <div className="flex justify-self-end whitespace-nowrap pr-4 sm:pr-8 md:pr-16 lg:pr-32 font-sans text-xl font-medium tracking-[-1px] text-[#0D3C61]">
+        <div className="flex justify-self-end whitespace-nowrap pr-4 sm:pr-8 md:pr-16 lg:pr-32 font-sans text-xl font-medium tracking-[-1px] text-info-dark">
           {!user ? (
             // 로그인 안 했을 때
-            <span>Login</span>
+            <span
+              className="cursor-pointer hover:text-brand-500"
+              onClick={() => setIsSignInOpen(true)}
+            >
+              Login
+            </span>
           ) : (
             // 로그인 했을 때
             <div ref={dropdownRef} className="relative">
@@ -81,7 +101,7 @@ const Header = () => {
                 />
               </button>
               {isOpen && (
-                <div className="absolute right-0 z-50 w-[118px] h-36 bg-white border border-brand-500/25 shadow-lg shadow-brand-500/25 rounded-lg rounded-tr-none flex flex-col gap-3 py-4 text-center text-lg font-sans font-medium text-[#0d3c61]">
+                <div className="absolute right-0 z-50 w-[118px] h-36 bg-white border border-brand-500/25 shadow-lg shadow-brand-500/25 rounded-lg rounded-tr-none flex flex-col gap-3 py-4 text-center text-lg font-sans font-medium text-info-dark">
                   <Link
                     to="/profile"
                     className="hover:text-brand-500"
@@ -103,6 +123,12 @@ const Header = () => {
             </div>
           )}
         </div>
+        {isSignInOpen && (
+          <SignInModal onClose={() => setIsSignInOpen(false)} onSwitchToSignUp={switchToSignUp} />
+        )}
+        {isSignUpOpen && (
+          <SignUpModal onClose={() => setIsSignUpOpen(false)} onSwitchToSignIn={switchToSignIn} />
+        )}
       </nav>
     </header>
   )
