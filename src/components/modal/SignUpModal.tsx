@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Modal from '../modal/Modal'
 import ModalInput from './components/ModalInput'
 import ModalButton from './components/ModalButton'
@@ -20,14 +20,13 @@ const initialValue = {
 }
 
 export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalProps) {
-
   const { signUp, isLoading, error } = useAuth()
   const { values, errors, touched, getInputProps } = useForm({
     initialValue,
     validate: validateSignup,
   })
 
-    const isFormValid = Object.keys(errors).length === 0
+  const isFormValid = Object.keys(errors).length === 0
 
   const handleSubmit = async () => {
     if (Object.keys(errors).length > 0) return
@@ -42,6 +41,11 @@ export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalPr
       onClose()
     }
   }
+  useEffect(() => {
+    if (error) {
+      alert(error.message)
+    }
+  }, [error])
 
   return (
     <Modal onClose={onClose}>
@@ -62,20 +66,40 @@ export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalPr
         <div className="flex flex-col gap-5 mb-3">
           {/* 닉네임 입력 */}
           <div>
-            <ModalInput placeholder="닉네임" isError={touched.nickname && !!errors.nickname} {...getInputProps('nickname')} />
-            {touched.nickname && errors.nickname && <p className='absolute text-xs text-error-dark pl-5'>{errors.nickname}</p>}
+            <ModalInput
+              placeholder="닉네임"
+              isError={touched.nickname && !!errors.nickname}
+              {...getInputProps('nickname')}
+            />
+            {touched.nickname && errors.nickname && (
+              <p className="absolute text-xs text-error-dark pl-5">{errors.nickname}</p>
+            )}
           </div>
 
           {/* 이메일 입력 */}
           <div>
-            <ModalInput type="email" placeholder="이메일" isError={touched.email && !!errors.email} {...getInputProps('email')} />
-            {touched.email && errors.email && <p className='absolute text-xs text-error-dark pl-5'>{errors.email}</p>}
+            <ModalInput
+              type="email"
+              placeholder="이메일"
+              isError={touched.email && !!errors.email}
+              {...getInputProps('email')}
+            />
+            {touched.email && errors.email && (
+              <p className="absolute text-xs text-error-dark pl-5">{errors.email}</p>
+            )}
           </div>
 
           {/* 비밀번호 입력 */}
           <div>
-            <ModalInput type="password" placeholder="비밀번호" isError={touched.password && !!errors.password} {...getInputProps('password')} />
-            {touched.password && errors.password && <p className='absolute text-xs text-error-dark pl-5'>{errors.password}</p>}
+            <ModalInput
+              type="password"
+              placeholder="비밀번호"
+              isError={touched.password && !!errors.password}
+              {...getInputProps('password')}
+            />
+            {touched.password && errors.password && (
+              <p className="absolute text-xs text-error-dark pl-5">{errors.password}</p>
+            )}
           </div>
 
           {/* 비밀번호 확인 입력 */}
@@ -87,11 +111,9 @@ export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalPr
               isError={touched.passwordConfirm && !!errors.passwordConfirm}
             />
             {touched.passwordConfirm && errors.passwordConfirm && (
-              <p className='absolute text-xs text-error-dark pl-5'>{errors.passwordConfirm}</p>
+              <p className="absolute text-xs text-error-dark pl-5">{errors.passwordConfirm}</p>
             )}
           </div>
-          
-          {error && <p>{error.message}</p>}
 
           <ModalButton onClick={handleSubmit} disabled={!isFormValid || isLoading}>
             회원가입

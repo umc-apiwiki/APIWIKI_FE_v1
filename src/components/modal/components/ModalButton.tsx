@@ -7,13 +7,18 @@ type ModalButtonProps = {
   disabled?: boolean
 }
 
-export default function ModalButton({ children, onClick, className = '',disabled = false, }: ModalButtonProps) {
+export default function ModalButton({
+  children,
+  onClick,
+  className = '',
+  disabled = false,
+}: ModalButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`w-[308px] h-[55px] rounded-[30px] bg-brand-500 flex items-center justify-center cursor-pointer ${className} ${disabled ? 'bg-brand-300 cursor-not-allowed' : 'bg-brand-500 cursor-pointer'}`}
+      className={`w-[308px] h-[55px] rounded-[30px] flex items-center justify-center ${className} ${disabled ? 'bg-brand-300 cursor-not-allowed' : 'bg-brand-500 cursor-pointer'}`}
     >
       <span className="text-white text-lg font-medium font-s pb-1">{children}</span>
     </button>

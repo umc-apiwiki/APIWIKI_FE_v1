@@ -1,5 +1,5 @@
 type ModalInputProps = {
-  isError?: boolean;
+  isError?: boolean
   value: string
   placeholder?: string
   type?: string
@@ -13,7 +13,7 @@ export default function ModalInput({
   placeholder,
   type = 'text',
   onChange,
-  onBlur
+  onBlur,
 }: ModalInputProps) {
   return (
     <input
