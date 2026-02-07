@@ -45,10 +45,11 @@ const ExplorePage = () => {
   // 리셋 구분 (검색/필터/정렬 변경 시 true → 교체, 스크롤 시 false → 추가)
   const isResetRef = useRef(true)
 
-  // pageData 수신 시 items 업데이트
+  // pageData 수신 시 items 업데이트 (무한 스크롤 누적)
   useEffect(() => {
     if (!pageData?.content) return
 
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (isResetRef.current) {
       // 검색/필터/정렬 변경 → 교체
       setItems(pageData.content)
@@ -58,6 +59,7 @@ const ExplorePage = () => {
     }
     setHasMore(!pageData.last)
     setTotalElements(pageData.totalElements)
+    /* eslint-enable react-hooks/set-state-in-effect */
     isResetRef.current = false
   }, [pageData])
 
@@ -181,7 +183,11 @@ const ExplorePage = () => {
                 className="flex items-center hover:text-brand-500"
               >
                 <span>{currentSort.label}</span>
-                <img src={ArrowDown} alt="정렬" className={`transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
+                <img
+                  src={ArrowDown}
+                  alt="정렬"
+                  className={`transition-transform ${isSortOpen ? 'rotate-180' : ''}`}
+                />
               </button>
               {isSortOpen && (
                 <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-brand-500/20 z-20 min-w-[120px]">

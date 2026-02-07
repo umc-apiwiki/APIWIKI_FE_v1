@@ -7,7 +7,13 @@ const PRICING_LABEL: Record<string, string> = {
   MIXED: 'Free & Paid',
 }
 
-export default function APICardSmall({ apiId, name, avgRating, reviewCount, pricingType }: ApiPreview) {
+export default function APICardSmall({
+  apiId,
+  name,
+  avgRating,
+  reviewCount,
+  pricingType,
+}: ApiPreview) {
   const navigate = useNavigate()
 
   return (
@@ -35,7 +41,9 @@ export default function APICardSmall({ apiId, name, avgRating, reviewCount, pric
             <h3 className="text-info-darker font-medium leading-tight text-xl pb-2">{name}</h3>
             <p className="text-sm font-medium">Star {avgRating.toFixed(1)}</p>
             <p className="text-sm font-medium">{reviewCount} reviews</p>
-            <p className="text-[#B0B0B0] text-xs mt-0.5">{PRICING_LABEL[pricingType] ?? pricingType}</p>
+            <p className="text-[#B0B0B0] text-xs mt-0.5">
+              {PRICING_LABEL[pricingType] ?? pricingType}
+            </p>
           </div>
         </div>
       </div>

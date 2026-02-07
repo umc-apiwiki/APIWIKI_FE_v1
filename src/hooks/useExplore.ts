@@ -1,14 +1,19 @@
 import { useCallback } from 'react'
 import { useApi } from './useApi'
 import { getApiList, getApiDetail, toggleFavorite } from '@/services/explore'
-import type { ApiListParams, PageResponse, ApiPreview, ApiDetail, FavoriteToggle } from '@/types/api'
+import type {
+  ApiListParams,
+  PageResponse,
+  ApiPreview,
+  ApiDetail,
+  FavoriteToggle,
+} from '@/types/api'
 
 /**
  * API 목록 조회 훅
  */
 export const useApiList = () => {
-  const { data, isLoading, error, execute, reset, clearError } =
-    useApi<PageResponse<ApiPreview>>()
+  const { data, isLoading, error, execute, reset, clearError } = useApi<PageResponse<ApiPreview>>()
 
   const fetchApiList = useCallback(
     (params?: ApiListParams) => {

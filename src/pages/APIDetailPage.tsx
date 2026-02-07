@@ -32,8 +32,10 @@ export default function APIDetailPage() {
     }
   }, [apiId, fetchApiDetail])
 
+  // apiDetail 로드 시 즐겨찾기 상태 동기화
   useEffect(() => {
     if (apiDetail) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsFavorited(apiDetail.isFavorited)
     }
   }, [apiDetail])
@@ -76,7 +78,9 @@ export default function APIDetailPage() {
           <div className="flex justify-between mx-auto items-center">
             <div className="flex flex-col justify-center gap-2 mt-3 w-full md:w-auto">
               <h1 className="font-semibold text-[50px] text-info-darker mb-10">{apiDetail.name}</h1>
-              <p className="font-medium text-2xl text-info-dark">Star {apiDetail.avgRating.toFixed(1)}</p>
+              <p className="font-medium text-2xl text-info-dark">
+                Star {apiDetail.avgRating.toFixed(1)}
+              </p>
               <p className="font-medium text-2xl text-info-dark mb-4">
                 {apiDetail.viewCounts.toLocaleString()} views
               </p>
@@ -95,7 +99,11 @@ export default function APIDetailPage() {
             {/* API 로고 */}
             <div className="w-72 h-72 rounded-[60px] overflow-hidden flex items-center justify-center flex-shrink-0 bg-white shadow-[1px_5px_10px_0px_var(--tw-shadow-color)] shadow-brand-500/25 border border-brand-500/25 mt-10 md:mt-0">
               {apiDetail.logo ? (
-                <img src={apiDetail.logo} alt={apiDetail.name} className="w-full h-full object-contain" />
+                <img
+                  src={apiDetail.logo}
+                  alt={apiDetail.name}
+                  className="w-full h-full object-contain"
+                />
               ) : (
                 <span className="text-brand-500 font-semibold text-6xl">
                   {apiDetail.name.charAt(0).toUpperCase()}
