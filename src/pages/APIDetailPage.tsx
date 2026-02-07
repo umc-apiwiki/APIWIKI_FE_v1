@@ -50,6 +50,7 @@ export default function APIDetailPage() {
   // 위키 데이터 로드 시 에디터 상태 동기화
   useEffect(() => {
     if (wikiData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWikiText(wikiData.content)
     }
   }, [wikiData])
