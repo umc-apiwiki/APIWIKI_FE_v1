@@ -8,7 +8,7 @@ import OverviewSection from '@/components/APIDetail/OverviewSection'
 import PricingSection from '@/components/APIDetail/PricingSection'
 import ReviewSection from '@/components/APIDetail/ReviewSection'
 import CodeExampleSection from '@/components/APIDetail/CodeExampleSection'
-import { useApiDetail, useFavoriteToggle } from '@/hooks'
+import { useApiDetail, useFavoriteToggle, useWikiContent, useWikiUpdate } from '@/hooks'
 import { saveBookmarkDate, removeBookmarkDate } from '@/utils/bookmarkDate'
 
 const MENUS = [
@@ -27,11 +27,17 @@ export default function APIDetailPage() {
   const { data: apiDetail, isLoading, error, fetchApiDetail } = useApiDetail()
   const { toggle } = useFavoriteToggle()
 
+  // ===== Wiki Hooks & State 추가 =====
+  const { data: wikiData, fetchWiki } = useWikiContent()
+  const { saveWiki } = useWikiUpdate()
+  const [wikiText, setWikiText] = useState('')
+
   useEffect(() => {
     if (apiId) {
       fetchApiDetail(apiId)
+      fetchWiki(apiId) // 위키 데이터 조회 추가
     }
-  }, [apiId, fetchApiDetail])
+  }, [apiId, fetchApiDetail, fetchWiki])
 
   // apiDetail 로드 시 즐겨찾기 상태 동기화
   useEffect(() => {
@@ -40,6 +46,13 @@ export default function APIDetailPage() {
       setIsFavorited(apiDetail.isFavorited)
     }
   }, [apiDetail])
+
+  // 위키 데이터 로드 시 에디터 상태 동기화
+  useEffect(() => {
+    if (wikiData) {
+      setWikiText(wikiData.content)
+    }
+  }, [wikiData])
 
   const handleToggleFavorite = useCallback(() => {
     const willBeFavorited = !isFavorited
@@ -53,6 +66,19 @@ export default function APIDetailPage() {
       }
     })
   }, [apiId, isFavorited, toggle])
+
+  // 위키 저장 핸들러
+  const handleSaveWiki = async () => {
+    try {
+      const currentVersion = wikiData?.version ?? 0
+      await saveWiki(apiId, { content: wikiText, version: currentVersion })
+      alert('위키가 저장되었습니다!')
+      fetchWiki(apiId) // 저장 후 최신 데이터 다시 조회하여 버전 동기화
+    } catch (e) {
+      console.error(e)
+      alert('위키 저장에 실패했습니다.')
+    }
+  }
 
   if (isLoading) {
     return (
@@ -170,7 +196,27 @@ export default function APIDetailPage() {
           {/* API 위키 */}
           <div>
             <span className="font-sans font-medium text-2xl text-info-dark">API 위키</span>
-            <div className="w-full max-w-[1112px] h-[580px] bg-white border border-brand-500 rounded-xl mt-3 mb-10" />
+
+            {/* 위키 테스트 에디터 UI */}
+            <div className="w-full max-w-[1112px] mt-3 mb-10 p-4 border border-brand-500 rounded-xl bg-white">
+              <textarea
+                className="w-full h-[400px] p-4 border border-gray-300 rounded-md resize-none outline-none focus:border-brand-500 font-sans text-lg"
+                value={wikiText}
+                onChange={(e) => setWikiText(e.target.value)}
+                placeholder="위키 내용을 입력하세요..."
+              />
+              <div className="flex justify-between items-center mt-4">
+                <span className="text-gray-500 text-sm font-sans">
+                  현재 버전: <span className="font-bold">{wikiData?.version ?? 0}</span>
+                </span>
+                <button
+                  onClick={handleSaveWiki}
+                  className="px-6 py-2 bg-brand-500 text-white font-bold rounded-lg hover:bg-brand-600 transition-colors shadow-md"
+                >
+                  위키 저장하기
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
