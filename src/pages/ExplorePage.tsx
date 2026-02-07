@@ -71,12 +71,12 @@ const ExplorePage = () => {
   // params 변경 시 재조회 (중복 호출 방지)
   useEffect(() => {
     const currentParamsKey = JSON.stringify(params)
-    
+
     // 이전 호출과 동일한 params인 경우 스킵
     if (prevParamsRef.current === currentParamsKey) {
       return
     }
-    
+
     prevParamsRef.current = currentParamsKey
     fetchApiList(params)
   }, [params, fetchApiList])
