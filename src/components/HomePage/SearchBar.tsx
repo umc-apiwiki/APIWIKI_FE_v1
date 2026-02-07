@@ -6,18 +6,38 @@ import Cancel from '@/assets/icons/common/ic_cancel.svg'
 type SearchBarProps = {
   isOpen?: boolean
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>
-  isMain?: boolean // 홈페이지 여부
+  isMain?: boolean
+  onSearch?: (query: string) => void
 }
 
-export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchBarProps) {
-  // Allow uncontrolled mode when props are not provided
+export default function SearchBar({ isOpen, setIsOpen, isMain = false, onSearch }: SearchBarProps) {
   const [internalOpen, setInternalOpen] = useState(false)
+  const [query, setQuery] = useState('')
   const controlled = typeof isOpen === 'boolean' && typeof setIsOpen === 'function'
   const openState = controlled ? isOpen : internalOpen
   const setOpen = controlled ? setIsOpen : setInternalOpen
   const containerRef = useRef<HTMLDivElement>(null)
 
   const recentSearches = ['AWS API', '네이버지도 API', '강아지 앱 API', '게임 앱 API']
+
+  const handleSearch = () => {
+    if (query.trim()) {
+      onSearch?.(query.trim())
+      setOpen(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
+  const handleRecentClick = (text: string) => {
+    setQuery(text)
+    onSearch?.(text)
+    setOpen(false)
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -62,13 +82,16 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchB
         <div className="h-14 w-full flex items-center px-[30px] relative shrink-0">
           <input
             type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full h-full text-lg text-info-darker font-medium font-sans placeholder:text-slate-400 outline-none bg-transparent ml-1"
             placeholder="궁금한 API를 검색해보세요"
             onFocus={() => setOpen(true)}
           />
 
           <div className="w-6 h-6 flex items-center justify-center cursor-pointer ml-4">
-            <button type="button">
+            <button type="button" onClick={handleSearch}>
               <img src={SearchLine} alt="검색" />
             </button>
           </div>
@@ -83,6 +106,7 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false }: SearchB
           {recentSearches.map((text, index) => (
             <div
               key={index}
+              onClick={() => handleRecentClick(text)}
               className="group relative w-full h-14 flex items-center px-[20px] cursor-pointer transition-all duration-200
             hover:bg-brand-500/10 hover:rounded-[30px] hover:rounded-br-[30px]"
             >

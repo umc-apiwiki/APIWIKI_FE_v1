@@ -5,6 +5,7 @@ import SearchTagSection from '@/components/HomePage/SearchTagSection'
 import BottomButtonSection from '@/components/HomePage/BottomButtonSection'
 import APICardSmall from '@/components/APICardSmall'
 import NewsCard from '@/components/NewsCard'
+import type { ApiPreview } from '@/types/api'
 
 // -------------------- 1. 데이터 정의 --------------------
 interface APIData {
@@ -15,6 +16,19 @@ interface APIData {
   price: string
   iconUrl: string
 }
+
+const toPreview = (d: APIData): ApiPreview => ({
+  apiId: d.id,
+  name: d.title,
+  summary: '',
+  avgRating: parseFloat(d.star) || 0,
+  reviewCount: 0,
+  viewCounts: 0,
+  pricingType: d.price === 'Free' ? 'FREE' : d.price === 'Mixed' ? 'MIXED' : 'PAID',
+  authType: 'API_KEY',
+  providerCompany: 'ETC',
+  isFavorited: false,
+})
 interface NewsData {
   title: string
   publisher: string
@@ -209,7 +223,7 @@ const ScrollableSection = ({
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {type === 'api'
-          ? (data as APIData[]).map((api) => <APICardSmall key={api.id} {...api} />)
+          ? (data as APIData[]).map((api) => <APICardSmall key={api.id} {...toPreview(api)} />)
           : (data as NewsData[]).map((news, i) => (
               <NewsCard
                 key={i}

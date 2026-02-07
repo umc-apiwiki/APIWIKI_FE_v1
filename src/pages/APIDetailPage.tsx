@@ -1,16 +1,14 @@
 import { useParams } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
 
 import HeartLine from '@/assets/icons/common/ic_heart_line.svg'
 import HeartFill from '@/assets/icons/common/ic_heart_fill.svg'
 import Share from '@/assets/icons/action/ic_share.svg'
-import { useState } from 'react'
 import OverviewSection from '@/components/APIDetail/OverviewSection'
 import PricingSection from '@/components/APIDetail/PricingSection'
 import ReviewSection from '@/components/APIDetail/ReviewSection'
 import CodeExampleSection from '@/components/APIDetail/CodeExampleSection'
-import { useBookmark } from '@/context/BookmarkContext'
-import { apiData } from '@/data/mockData'
-import APICardSmall from '@/components/APICardSmall'
+import { useApiDetail, useFavoriteToggle } from '@/hooks'
 
 const MENUS = [
   { key: 'A', label: '개요' },
@@ -22,58 +20,115 @@ const MENUS = [
 export default function APIDetailPage() {
   const { id } = useParams()
   const apiId = Number(id)
-  const api = apiData.find((item) => item.id === apiId)
   const [activeMenu, setActiveMenu] = useState<'A' | 'B' | 'C' | 'D'>('A')
+  const [isFavorited, setIsFavorited] = useState(false)
 
-  const { toggleBookmark, isBookmarked } = useBookmark()
+  const { data: apiDetail, isLoading, error, fetchApiDetail } = useApiDetail()
+  const { toggle } = useFavoriteToggle()
 
-  const bookmarked = isBookmarked(apiId)
+  useEffect(() => {
+    if (apiId) {
+      fetchApiDetail(apiId)
+    }
+  }, [apiId, fetchApiDetail])
+
+  useEffect(() => {
+    if (apiDetail) {
+      setIsFavorited(apiDetail.isFavorited)
+    }
+  }, [apiDetail])
+
+  const handleToggleFavorite = useCallback(() => {
+    setIsFavorited((prev) => !prev)
+    toggle(apiId)
+  }, [apiId, toggle])
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20 text-red-500 font-sans">
+        <p>{error}</p>
+        <button
+          type="button"
+          onClick={() => fetchApiDetail(apiId)}
+          className="mt-4 px-6 py-2 bg-brand-500 text-white rounded-full text-sm"
+        >
+          다시 시도
+        </button>
+      </div>
+    )
+  }
+
+  if (!apiDetail) return null
 
   return (
     <div className="mx-auto px-16 mt-32 2xl:mx-44">
-      {/* 메인 영역 */}
       <div className="p-5">
-        {/* api 상세정보 + 이미지 */}
+        {/* API 상세정보 + 로고 */}
         <div className="mb-28">
-          {/* 아이콘과 텍스트가 가로로 배치되는 영역 */}
           <div className="flex justify-between mx-auto items-center">
             <div className="flex flex-col justify-center gap-2 mt-3 w-full md:w-auto">
-              <h1 className="font-semibold text-[50px] text-info-darker mb-10">{api?.title}</h1>
-              <p className="font-medium text-2xl text-info-dark">Star {api?.star}</p>
-              <p className="font-medium text-2xl text-info-dark mb-4">Used by {api?.usedBy}</p>
-              <p className="font-normal text-xl text-[#B0B0B0]">{api?.price}</p>
+              <h1 className="font-semibold text-[50px] text-info-darker mb-10">{apiDetail.name}</h1>
+              <p className="font-medium text-2xl text-info-dark">Star {apiDetail.avgRating.toFixed(1)}</p>
+              <p className="font-medium text-2xl text-info-dark mb-4">
+                {apiDetail.viewCounts.toLocaleString()} views
+              </p>
+              <p className="font-normal text-xl text-[#B0B0B0]">{apiDetail.summary}</p>
+              {apiDetail.officialUrl && (
+                <a
+                  href={apiDetail.officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-500 text-lg font-medium hover:underline mt-2"
+                >
+                  공식 사이트
+                </a>
+              )}
             </div>
-            {/* api 이미지 */}
+            {/* API 로고 */}
             <div className="w-72 h-72 rounded-[60px] overflow-hidden flex items-center justify-center flex-shrink-0 bg-white shadow-[1px_5px_10px_0px_var(--tw-shadow-color)] shadow-brand-500/25 border border-brand-500/25 mt-10 md:mt-0">
-              <img src={api?.iconUrl} alt={api?.title} className="w-full h-full object-contain " />
+              {apiDetail.logo ? (
+                <img src={apiDetail.logo} alt={apiDetail.name} className="w-full h-full object-contain" />
+              ) : (
+                <span className="text-brand-500 font-semibold text-6xl">
+                  {apiDetail.name.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
           </div>
         </div>
+
         {/* 하트 및 공유 / 하단 메뉴 */}
         <div className="m-2">
-          {/* 하트 및 공유 */}
           <div className="flex gap-4 mb-10">
             <img
-              src={bookmarked ? HeartFill : HeartLine}
+              src={isFavorited ? HeartFill : HeartLine}
               alt="찜"
               className="w-8 h-8 cursor-pointer"
-              onClick={() => toggleBookmark(apiId)}
+              onClick={handleToggleFavorite}
             />
-
             <img src={Share} alt="공유" />
           </div>
-          {/* 메뉴 */}
-          <div className="">
-            <div className="flex gap-6 font-sans font-medium pb-6 ">
+
+          {/* 메뉴 탭 */}
+          <div>
+            <div className="flex gap-6 font-sans font-medium pb-6">
               {MENUS.map(({ key, label }) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setActiveMenu(key)}
                   className={`
-                                relative pb-3 text-2xl transition-colors
-                                ${activeMenu === key ? 'text-info-dark' : 'text-[#B0B0B0]'}
-                                `}
+                    relative pb-3 text-2xl transition-colors
+                    ${activeMenu === key ? 'text-info-dark' : 'text-[#B0B0B0]'}
+                  `}
                 >
                   {label}
                   {activeMenu === key && (
@@ -82,33 +137,23 @@ export default function APIDetailPage() {
                 </button>
               ))}
             </div>
-            {/* 내용물 */}
             <div>
-              {activeMenu === 'A' && <OverviewSection />}
-
+              {activeMenu === 'A' && (
+                <OverviewSection
+                  longDescription={apiDetail.longDescription}
+                  categories={apiDetail.categories}
+                />
+              )}
               {activeMenu === 'B' && <PricingSection />}
-
               {activeMenu === 'C' && <ReviewSection />}
-
               {activeMenu === 'D' && <CodeExampleSection />}
             </div>
           </div>
+
           {/* API 위키 */}
           <div>
             <span className="font-sans font-medium text-2xl text-info-dark">API 위키</span>
             <div className="w-full max-w-[1112px] h-[580px] bg-white border border-brand-500 rounded-xl mt-3 mb-10" />
-          </div>
-          {/* 비슷한 api */}
-          <div>
-            <div className="mb-6">
-              <span className="text-2xl font-medium text-info-dark">비슷한 API</span>
-            </div>
-
-            <div className="flex gap-10 overflow-hidden pb-20">
-              {apiData.map((data) => (
-                <APICardSmall key={data.id} {...data} />
-              ))}
-            </div>
           </div>
         </div>
       </div>

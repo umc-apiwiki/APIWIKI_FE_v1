@@ -3,6 +3,7 @@ import APICardSmall from '../components/APICardSmall'
 import APICarousel from '../components/APICarousel'
 import NewsCard from '../components/NewsCard'
 import SearchBar from '../components/HomePage/SearchBar'
+import type { ApiPreview } from '../types/api'
 
 // API 데이터의 구조를 정의하는 인터페이스
 interface APIData {
@@ -14,6 +15,19 @@ interface APIData {
   iconUrl: string
   description?: string
 }
+
+const toPreview = (d: APIData): ApiPreview => ({
+  apiId: d.id,
+  name: d.title,
+  summary: d.description ?? '',
+  avgRating: parseFloat(d.star) || 0,
+  reviewCount: 0,
+  viewCounts: 0,
+  pricingType: d.price === 'Free' ? 'FREE' : d.price === 'Mixed' ? 'MIXED' : 'PAID',
+  authType: 'API_KEY',
+  providerCompany: 'ETC',
+  isFavorited: false,
+})
 
 // 뉴스 데이터의 구조를 정의하는 인터페이스
 interface NewsData {
@@ -645,12 +659,12 @@ export default function HomePage2() {
 
       <APICarousel title="인기 API">
         {popularAPIs.map((api) => (
-          <APICard key={api.id} {...api} />
+          <APICard key={api.id} {...toPreview(api)} />
         ))}
       </APICarousel>
       <APICarousel title="제안 API">
         {suggestAPIs.map((api) => (
-          <APICard key={api.id} {...api} />
+          <APICard key={api.id} {...toPreview(api)} />
         ))}
       </APICarousel>
       <APICarousel title="최신 뉴스">
@@ -682,9 +696,9 @@ export default function HomePage2() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 justify-items-center">
             {list.data.map((item) =>
               list.isLarge ? (
-                <APICard key={item.id} {...item} />
+                <APICard key={item.id} {...toPreview(item)} />
               ) : (
-                <APICardSmall key={item.id} {...item} />
+                <APICardSmall key={item.id} {...toPreview(item)} />
               )
             )}
           </div>
