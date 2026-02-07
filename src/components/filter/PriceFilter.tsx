@@ -1,37 +1,38 @@
+import type { PricingType } from '@/types/api'
+
 type PriceFilterProps = {
-  value: string[]
-  onChange: (next: string[]) => void
+  value: PricingType[]
+  onChange: (next: PricingType[]) => void
 }
 
+const OPTIONS: { label: string; value: PricingType }[] = [
+  { label: '무료', value: 'FREE' },
+  { label: '유료', value: 'PAID' },
+  { label: '혼합', value: 'MIXED' },
+]
+
 export default function PriceFilter({ value, onChange }: PriceFilterProps) {
-  const prices = ['무료', '유료', '혼합']
-
-  const togglePrice = (price: string) => {
-    const next = value.includes(price) ? value.filter((p) => p !== price) : [...value, price]
-
+  const toggle = (v: PricingType) => {
+    const next = value.includes(v) ? value.filter((p) => p !== v) : [...value, v]
     onChange(next)
   }
 
   return (
     <div className="flex flex-col gap-6">
-      {prices.map((price) => {
-        const isChecked = value.includes(price)
-
-        return (
-          <label
-            key={price}
-            className="flex items-center gap-3 cursor-pointer font-sans font-normal text-lg text-info-darker"
-          >
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={() => togglePrice(price)}
-              className="w-4 h-4 accent-brand-500 rounded border border-brand-500"
-            />
-            {price}
-          </label>
-        )
-      })}
+      {OPTIONS.map(({ label, value: optVal }) => (
+        <label
+          key={optVal}
+          className="flex items-center gap-3 cursor-pointer font-sans font-normal text-lg text-info-darker"
+        >
+          <input
+            type="checkbox"
+            checked={value.includes(optVal)}
+            onChange={() => toggle(optVal)}
+            className="w-4 h-4 accent-brand-500 rounded border border-brand-500"
+          />
+          {label}
+        </label>
+      ))}
     </div>
   )
 }
