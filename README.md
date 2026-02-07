@@ -45,19 +45,24 @@ npm run test:coverage  # 테스트 커버리지 확인
 
 ## AI 개발 지원
 
-### GitHub Copilot 설정
+### AI 프롬프트 설정
 
-- `docs/Prompt/Instructions.md`: AI 코딩 어시스턴트를 위한 프로젝트 가이드라인
+- `docs/Prompt/Instructions.md`: AI 코딩 어시스턴트(GitHub Copilot, Cursor 등)용 프로젝트 개발 가이드
   - 아키텍처 원칙 (로직/뷰 분리)
   - 기술 스택 및 버전 정보
   - 코딩 컨벤션 및 베스트 프랙티스
-- `.github/copilot-instructions.md`: PR 작성 시 한국어 사용 가이드
+  - AI가 코드 생성 시 참고하는 표준 문서
+- `.github/copilot-instructions.md`: GitHub Copilot의 PR 작성 전용 가이드
+  - PR 설명, 타이틀, 리뷰 코멘트를 한국어로 작성
+  - 기술 용어는 영문 병기
 
 ### API 문서
 
 - `docs/swagger.json`: 백엔드 API 명세 (OpenAPI 3.1.0)
   - **중요**: AI에게 전달 시 JSON 형식이 Markdown보다 효율적
-  - `docs/api-docs.md`: 사람이 읽기 쉬운 Markdown 버전도 별도 제공
+  - 구조화된 데이터로 정확한 타입 추론 가능
+- `docs/api-docs.md`: 사람이 읽기 쉬운 Markdown 버전
+  - 개발자가 브라우저에서 확인용
 - API 타입: `src/types/api.ts`에서 TypeScript 타입 정의
 
 ## Tailwind 설정
