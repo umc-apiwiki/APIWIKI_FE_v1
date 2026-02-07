@@ -32,3 +32,4 @@ dist-ssr
 yarn.lock
 *.claude
 .claude/*
+settings.local.json
