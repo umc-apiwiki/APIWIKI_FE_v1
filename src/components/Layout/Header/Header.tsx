@@ -3,7 +3,7 @@ import HomeLogo from '@/assets/icons/navigation/ic_home_logo.svg'
 import { useEffect, useRef, useState } from 'react'
 import SignInModal from '@/components/modal/SignInModal'
 import SignUpModal from '@/components/modal/SignUpModal'
-import { useAuth } from '@/context/AuthProvider'
+import { useAuth } from '@/hooks/useAuth'
 import { getMyInfo } from '@/apis/auth'
 import ProfileImg from '@/assets/default_profile.png'
 

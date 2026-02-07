@@ -6,7 +6,7 @@ import BrandLogo from '@/assets/icons/common/ic_brand_logo.svg'
 import Cancel from '@/assets/icons/common/ic_cancel.svg'
 import { validateSignIn } from '@/utils/validateSignIn'
 import useForm from '@/hooks/useForm'
-import { useAuth } from '@/context/AuthProvider'
+import { useAuth } from '@/hooks/useAuth'
 
 type LoginModalProps = {
   onClose: () => void

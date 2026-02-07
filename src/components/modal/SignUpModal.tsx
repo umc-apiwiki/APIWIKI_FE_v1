@@ -7,6 +7,7 @@ import Cancel from '@/assets/icons/common/ic_cancel.svg'
 import { validateSignup } from '@/utils/validateSignUp'
 import useForm from '@/hooks/useForm'
 import { postSignup } from '@/apis/auth'
+import axios from 'axios'
 
 type SignUpModalProps = {
   onClose: () => void
@@ -20,6 +21,10 @@ const initialValue = {
   passwordConfirm: '',
 }
 
+interface ApiError {
+  message: string
+}
+
 export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -29,10 +34,11 @@ export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalPr
     validate: validateSignup,
   })
 
-  const isFormValid = Object.keys(errors).length === 0
+  const isFormValid =
+    Object.values(values).every((value) => value.trim() !== '') && Object.keys(errors).length === 0
 
   const handleSubmit = async () => {
-    if (Object.keys(errors).length > 0 || isLoading) return
+    if (!isFormValid || isLoading) return
 
     setIsLoading(true)
     setErrorMessage(null)
@@ -50,8 +56,15 @@ export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalPr
       } else {
         setErrorMessage(response.message || '회원가입에 실패했습니다.')
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || '네트워크 오류가 발생했습니다.'
+    } catch (error: unknown) {
+      let message = '네트워크 오류가 발생했습니다.'
+
+      /* axios 에러인지 확인하며 타입 좁히기 수행 */
+      if (axios.isAxiosError<ApiError>(error)) {
+        message = error.response?.data?.message || message
+      } else if (error instanceof Error) {
+        message = error.message
+      }
       setErrorMessage(message)
     } finally {
       setIsLoading(false)
@@ -67,7 +80,9 @@ export default function SignUpModal({ onClose, onSwitchToSignIn }: SignUpModalPr
   return (
     <Modal onClose={onClose}>
       {/* 닫기 버튼 */}
-      <img src={Cancel} alt="닫기" onClick={onClose} className="absolute right-2 z-50 m-4" />
+      <button onClick={onClose} className="absolute right-2 z-50 m-4">
+        <img src={Cancel} alt="닫기" />
+      </button>
 
       {/* 모달 안 */}
       <div className="m-8 flex flex-col items-center">
