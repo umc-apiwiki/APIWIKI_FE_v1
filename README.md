@@ -60,6 +60,7 @@ npm run test:coverage  # 테스트 커버리지 확인
 
 - `docs/swagger.json`: 백엔드 API 명세 (OpenAPI 3.1.0)
   - **중요**: AI에게 전달 시 JSON 형식이 Markdown보다 효율적
+  - https://apiwiki-api.my-project.cloud/v3/api-docs 업데이트 되면 여기로 가서 복사하기
   - 구조화된 데이터로 정확한 타입 추론 가능
 - `docs/api-docs.md`: 사람이 읽기 쉬운 Markdown 버전
   - 개발자가 브라우저에서 확인용
