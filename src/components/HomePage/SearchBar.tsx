@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import SearchLine from '@/assets/icons/action/ic_search_line.svg'
 import SearchHistory from '@/assets/icons/common/ic_search_history.svg'
 import Cancel from '@/assets/icons/common/ic_cancel.svg'
+import { getSearchHistory, addSearchHistory, removeSearchHistory } from '@/utils/searchHistory'
 
 type SearchBarProps = {
   isOpen?: boolean
@@ -13,17 +14,24 @@ type SearchBarProps = {
 export default function SearchBar({ isOpen, setIsOpen, isMain = false, onSearch }: SearchBarProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
   const controlled = typeof isOpen === 'boolean' && typeof setIsOpen === 'function'
   const openState = controlled ? isOpen : internalOpen
   const setOpen = controlled ? setIsOpen : setInternalOpen
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const recentSearches = ['AWS API', '네이버지도 API', '강아지 앱 API', '게임 앱 API']
+  // 검색 내역 로드
+  useEffect(() => {
+    setRecentSearches(getSearchHistory())
+  }, [openState])
 
   const handleSearch = () => {
     if (query.trim()) {
+      addSearchHistory(query.trim())
       onSearch?.(query.trim())
+      setQuery('')
       setOpen(false)
+      setRecentSearches(getSearchHistory())
     }
   }
 
@@ -35,8 +43,16 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false, onSearch 
 
   const handleRecentClick = (text: string) => {
     setQuery(text)
+    addSearchHistory(text)
     onSearch?.(text)
+    setQuery('')
     setOpen(false)
+  }
+
+  const handleRemoveHistory = (e: React.MouseEvent, text: string) => {
+    e.stopPropagation()
+    removeSearchHistory(text)
+    setRecentSearches(getSearchHistory())
   }
 
   useEffect(() => {
@@ -103,26 +119,32 @@ export default function SearchBar({ isOpen, setIsOpen, isMain = false, onSearch 
           <span className="font-sans font-medium text-lg text-brand-800 tracking-[-1px] px-[20px] p-0">
             Recent
           </span>
-          {recentSearches.map((text, index) => (
-            <div
-              key={index}
-              onClick={() => handleRecentClick(text)}
-              className="group relative w-full h-14 flex items-center px-[20px] cursor-pointer transition-all duration-200
-            hover:bg-brand-500/10 hover:rounded-[30px] hover:rounded-br-[30px]"
-            >
-              <div className="w-6 h-6 flex items-center justify-center mr-4">
-                <img src={SearchHistory} alt="최근 기록" />
-              </div>
-
-              <span className="text-info-darker text-lg font-medium font-sans flex-1">{text}</span>
-
-              <div className="w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <button type="button">
-                  <img src={Cancel} alt="삭제" />
-                </button>
-              </div>
+          {recentSearches.length === 0 ? (
+            <div className="px-[20px] py-4 text-center text-slate-400 text-sm font-sans">
+              최근 검색 내역이 없습니다
             </div>
-          ))}
+          ) : (
+            recentSearches.map((text, index) => (
+              <div
+                key={index}
+                onClick={() => handleRecentClick(text)}
+                className="group relative w-full h-14 flex items-center px-[20px] cursor-pointer transition-all duration-200
+            hover:bg-brand-500/10 hover:rounded-[30px] hover:rounded-br-[30px]"
+              >
+                <div className="w-6 h-6 flex items-center justify-center mr-4">
+                  <img src={SearchHistory} alt="최근 기록" />
+                </div>
+
+                <span className="text-info-darker text-lg font-medium font-sans flex-1">{text}</span>
+
+                <div className="w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button type="button" onClick={(e) => handleRemoveHistory(e, text)}>
+                    <img src={Cancel} alt="삭제" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
