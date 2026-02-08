@@ -11,15 +11,9 @@ import ReviewSection from '@/components/APIDetail/ReviewSection'
 import CodeExampleSection from '@/components/APIDetail/CodeExampleSection'
 import APICardSmall from '@/components/APICardSmall'
 
-import {
-  useApiDetail,
-  useFavoriteToggle,
-  useWikiContent,
-  useWikiUpdate,
-  useApiPricing,
-  useApiList,
-} from '@/hooks'
-import { saveBookmarkDate, removeBookmarkDate } from '@/utils/bookmarkDate'
+import { useApiDetail, useWikiContent, useWikiUpdate, useApiPricing, useApiList } from '@/hooks'
+
+import { usePostFavorite } from '@/hooks/mutations/usePostFavorite'
 import type { ApiDetail } from '@/types/api'
 
 const MENUS = [
@@ -94,7 +88,7 @@ export default function APIDetailPage() {
 
   // 서버 데이터 호출 (하드코딩 데이터가 없을 때를 대비해 호출은 유지)
   const { data: serverApiDetail, isLoading, error, fetchApiDetail } = useApiDetail()
-  const { toggle } = useFavoriteToggle()
+  const { mutate: toggleFavorite, isLoading: isToggling } = usePostFavorite()
   const { data: wikiData, fetchWiki } = useWikiContent()
   const { saveWiki } = useWikiUpdate()
   const { data: pricingData, fetchApiPricing } = useApiPricing()
@@ -103,9 +97,7 @@ export default function APIDetailPage() {
   // 하드코딩 데이터가 있으면 그걸 쓰고, 없으면 서버 데이터를 쓴다!
   const finalDetail = (MOCK_DATA[apiId] || serverApiDetail) as ApiDetail & { pricingType?: string }
 
-  // 별도의 isFavorited State를 만들지 않고 finalDetail에서 직접 값을 가져오거나, 로컬에서 바뀐 값만 추적합니다.
-  const [localFavorite, setLocalFavorite] = useState<boolean | null>(null)
-  const isFavorited = localFavorite !== null ? localFavorite : (finalDetail?.isFavorited ?? false)
+  const isFavorited = finalDetail?.isFavorited ?? false
 
   // WikiText 동기화 로직 최적화: 린트 에러 해결을 위해 useEffect 대신 렌더링 시점에 값을 결정합니다.
   const [isEditing, setIsEditing] = useState(false)
@@ -138,18 +130,14 @@ export default function APIDetailPage() {
   }, [finalDetail, fetchApiList])
 
   // 찜하기 버튼 핸들러 수정
-  const handleToggleFavorite = useCallback(() => {
-    const nextStatus = !isFavorited
-    setLocalFavorite(nextStatus) // 로컬 상태 즉시 반영
+  const handleToggleFavorite = useCallback(async () => {
+    if (isToggling) return
 
-    toggle(apiId, (result) => {
-      if (result.isFavorited) {
-        saveBookmarkDate(apiId)
-      } else {
-        removeBookmarkDate(apiId)
-      }
-    })
-  }, [apiId, isFavorited, toggle])
+    const result = await toggleFavorite(apiId)
+
+    // 서버 응답 기준으로 상태 반영
+    finalDetail.isFavorited = result.isFavorited
+  }, [apiId, toggleFavorite, isToggling, finalDetail])
 
   const handleSaveWiki = async () => {
     if (!displayWikiText.trim()) {
