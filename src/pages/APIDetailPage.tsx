@@ -305,7 +305,7 @@ export default function APIDetailPage() {
           <div className="mt-20">
             <div className="flex justify-between items-end mb-3">
               <span className="font-sans font-medium text-2xl text-info-dark">API 위키</span>
-              <span className="text-gray-500 text-sm font-sans">
+              <span className="text-gray-500 text-sm font-sans mr-4">
                 마지막 업데이트 버전: <span className="font-bold">{wikiData?.version ?? 0}</span>
               </span>
             </div>
@@ -334,7 +334,7 @@ export default function APIDetailPage() {
                   </div>
                 </div>
               ) : (
-                <div data-color-mode="light">
+                <div data-color-mode="light" className='p-5'>
                   {wikiData?.content ? (
                     <MDEditor.Markdown
                       source={wikiData.content}
