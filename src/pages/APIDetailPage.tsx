@@ -91,6 +91,7 @@ export default function APIDetailPage() {
   const { saveWiki } = useWikiUpdate()
   const { data: pricingData, fetchApiPricing } = useApiPricing()
   const { data: similarApisData, fetchApiList } = useApiList()
+  const { pricing, isLoading: isPricingLoading } = useApiPricing(finalDetail.apiId)
 
   // 최종 상세 데이터 결정 (하드코딩 우선)
   const finalDetail = (MOCK_DATA[apiId] || serverApiDetail) as ApiDetail & { pricingType?: string }
@@ -265,7 +266,12 @@ export default function APIDetailPage() {
               categories={finalDetail.categories}
             />
           )}
-          {activeMenu === 'B' && <PricingSection categories={finalDetail.categories} />}
+          {activeMenu === 'B' && (
+            <PricingSection 
+              categories={finalDetail.categories} 
+              pricing={pricing} 
+            />
+          )}
           {activeMenu === 'C' && <ReviewSection />}
           {activeMenu === 'D' && <CodeExampleSection />}
         </div>

@@ -1,31 +1,37 @@
 import Category from './Category'
-import type { CategoryItem } from '@/types/api'
+import type { CategoryItem, ApiPricing } from '@/types/api'
 
 type PricingSectionProps = {
   categories: CategoryItem[]
+  pricing: ApiPricing | null
 }
 
-export default function PricingSection({ categories }: PricingSectionProps) {
+export default function PricingSection({ categories, pricing }: PricingSectionProps) {
+  // 요금 정보가 없을 경우를 대비한 기본값 처리임
+  if (!pricing) return null
+
   return (
     <div>
       {/* 요금제 */}
       <div className="mb-20">
-        <span className="text-[22px] font-medium text-info-darker ">요금제</span>
-        <p className="text-xl font-medium text-info-dark mt-2">
-          입력:
-          <br />
-          US$1.750/100만 개 토큰
-          <br />
-          캐시된 입력:
-          <br />
-          US$0.175/100만 개 토큰
-          <br />
-          출력:
-          <br />
-          US$14.000/100만 개 토큰
-          <br />
-        </p>
+        <span className="text-[22px] font-medium text-info-darker">요금제</span>
+        <div className="mt-2">
+          {pricing.pricingType === 'FREE' ? (
+            <p className="text-xl font-medium text-info-dark">무료</p>
+          ) : (
+            <p className="text-xl font-medium text-info-dark">
+              {/* CSV 문자열을 분리하여 줄바꿈으로 렌더링함 */}
+              {pricing.pricingInfoCsv.split(',').map((info, index) => (
+                <span key={index}>
+                  {info.trim()}
+                  <br />
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
       </div>
+      
       {/* 카테고리 */}
       {categories.length > 0 && (
         <div className="z-10">
