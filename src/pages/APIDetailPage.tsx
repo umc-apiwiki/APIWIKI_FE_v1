@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
-import MDEditor from '@uiw/react-md-editor' // 마크다운 에디터 추가
+import MDEditor from '@uiw/react-md-editor'
 
 import HeartLine from '@/assets/icons/common/ic_heart_line.svg'
 import HeartFill from '@/assets/icons/common/ic_heart_fill.svg'
@@ -9,8 +9,18 @@ import OverviewSection from '@/components/APIDetail/OverviewSection'
 import PricingSection from '@/components/APIDetail/PricingSection'
 import ReviewSection from '@/components/APIDetail/ReviewSection'
 import CodeExampleSection from '@/components/APIDetail/CodeExampleSection'
-import { useApiDetail, useFavoriteToggle, useWikiContent, useWikiUpdate } from '@/hooks'
+import APICardSmall from '@/components/APICardSmall'
+
+import {
+  useApiDetail,
+  useFavoriteToggle,
+  useWikiContent,
+  useWikiUpdate,
+  useApiPricing,
+  useApiList,
+} from '@/hooks'
 import { saveBookmarkDate, removeBookmarkDate } from '@/utils/bookmarkDate'
+import type { ApiDetail } from '@/types/api' // 타입 임포트
 
 const MENUS = [
   { key: 'A', label: '개요' },
@@ -19,40 +29,101 @@ const MENUS = [
   { key: 'D', label: '코드예제' },
 ] as const
 
+const PRICING_LABEL: Record<string, string> = {
+  FREE: 'Free',
+  PAID: 'Paid',
+  MIXED: 'Free & Paid',
+}
+
+// ✅ [MVP 하드코딩] 상세 페이지용 가짜 데이터 (HomePage의 ID와 일치시킴)
+const MOCK_DATA: Record<number, ApiDetail & { pricingType?: string }> = {
+  1: {
+    apiId: 1,
+    name: 'YouTube Data API',
+    summary: 'YouTube의 동영상, 채널, 재생목록 등을 관리할 수 있는 API입니다.',
+    longDescription:
+      'YouTube Data API를 사용하면 애플리케이션에 YouTube 기능을 통합할 수 있습니다. 동영상 업로드, 재생목록 관리, 댓글 작성 등의 기능을 제공하며, 수십억 개의 동영상 콘텐츠에 접근할 수 있는 강력한 도구입니다.',
+    officialUrl: 'https://developers.google.com/youtube/v3',
+    avgRating: 4.8,
+    viewCounts: 1200000000,
+    categories: [{ categoryId: 101, name: 'Video' }], // 태그 검색용 가짜 ID
+    logo: '/images/YouTube.svg', // 로컬 이미지
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isFavorited: false,
+    pricingType: 'FREE', // 상세페이지용 추가 필드
+  },
+  2: {
+    apiId: 2,
+    name: 'OpenStreetMap',
+    summary: '전 세계의 무료 지도 데이터를 제공하는 오픈 소스 프로젝트입니다.',
+    longDescription:
+      'OpenStreetMap(OSM)은 누구나 편집할 수 있는 무료 지도 데이터베이스입니다. 도로, 건물, 카페 등 전 세계의 지리 정보를 제공하며, 타일 서버나 경로 탐색 등 다양한 지리 정보 시스템(GIS) 애플리케이션에서 활용됩니다.',
+    officialUrl: 'https://www.openstreetmap.org',
+    avgRating: 4.1,
+    viewCounts: 760000000,
+    categories: [{ categoryId: 102, name: 'Map' }],
+    logo: '/images/OpenStreetMap.svg',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isFavorited: false,
+    pricingType: 'MIXED',
+  },
+  // 3번(Google Login), 4번(Open AI)... 등등 필요한 만큼 추가하시면 됩니다.
+}
+
 export default function APIDetailPage() {
   const { id } = useParams()
   const apiId = Number(id)
   const [activeMenu, setActiveMenu] = useState<'A' | 'B' | 'C' | 'D'>('A')
   const [isFavorited, setIsFavorited] = useState(false)
 
-  const { data: apiDetail, isLoading, error, fetchApiDetail } = useApiDetail()
+  // 서버 데이터 호출 (하드코딩 데이터가 없을 때를 대비해 호출은 유지)
+  const { data: serverApiDetail, isLoading, error, fetchApiDetail } = useApiDetail()
   const { toggle } = useFavoriteToggle()
-
-  // ===== Wiki Hooks & State =====
   const { data: wikiData, fetchWiki } = useWikiContent()
   const { saveWiki } = useWikiUpdate()
+  const { data: pricingData, fetchApiPricing } = useApiPricing()
+  const { data: similarApisData, fetchApiList } = useApiList()
 
-  // 에디터 상태 관리
+  // ✅ [핵심 수정] 하드코딩 데이터가 있으면 그걸 쓰고, 없으면 서버 데이터를 쓴다!
+  // any 타입 캐스팅은 MOCK_DATA에 pricingType을 섞어놨기 때문입니다.
+  const finalDetail = (MOCK_DATA[apiId] || serverApiDetail) as ApiDetail & { pricingType?: string }
+
   const [wikiText, setWikiText] = useState('')
-  const [isEditing, setIsEditing] = useState(false) // 수정 모드 여부
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     if (apiId) {
+      // 서버 데이터도 일단 호출은 해둠 (위키, 가격정보 등 보조 데이터를 위해)
       fetchApiDetail(apiId)
       fetchWiki(apiId)
+      fetchApiPricing(apiId)
     }
-  }, [apiId, fetchApiDetail, fetchWiki])
+  }, [apiId, fetchApiDetail, fetchWiki, fetchApiPricing])
+
+  // ✅ [수정됨] 비슷한 API 호출 (하드코딩 데이터의 태그도 인식하도록 수정)
+  useEffect(() => {
+    if (finalDetail && finalDetail.categories && finalDetail.categories.length > 0) {
+      const categoryId = finalDetail.categories[0].categoryId
+      fetchApiList({
+        categoryId,
+        size: 5,
+        sort: 'POPULAR',
+      })
+    } else if (finalDetail) {
+      fetchApiList({ size: 5, sort: 'POPULAR' })
+    }
+  }, [finalDetail, fetchApiList]) // apiDetail -> finalDetail로 변경
 
   useEffect(() => {
-    if (apiDetail) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsFavorited(apiDetail.isFavorited)
+    if (finalDetail) {
+      setIsFavorited(finalDetail.isFavorited)
     }
-  }, [apiDetail])
+  }, [finalDetail])
 
   useEffect(() => {
     if (wikiData) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWikiText(wikiData.content)
     }
   }, [wikiData])
@@ -70,34 +141,32 @@ export default function APIDetailPage() {
     })
   }, [apiId, isFavorited, toggle])
 
-  // 위키 저장 핸들러
   const handleSaveWiki = async () => {
     if (!wikiText.trim()) {
       alert('내용을 입력해주세요.')
       return
     }
-
     try {
       const currentVersion = wikiData?.version ?? 0
       await saveWiki(apiId, { content: wikiText, version: currentVersion })
       alert('위키가 저장되었습니다!')
       await fetchWiki(apiId)
-      setIsEditing(false) // 저장 성공 시 뷰어 모드로 전환
+      setIsEditing(false)
     } catch (e) {
       console.error(e)
       alert('위키 저장에 실패했습니다.')
     }
   }
 
-  // 수정 취소 핸들러
   const handleCancelEdit = () => {
     if (window.confirm('수정을 취소하시겠습니까? 작성 중인 내용은 사라집니다.')) {
-      setWikiText(wikiData?.content || '') // 원래 내용으로 복구
-      setIsEditing(false) // 뷰어 모드로 전환
+      setWikiText(wikiData?.content || '')
+      setIsEditing(false)
     }
   }
 
-  if (isLoading) {
+  // 하드코딩 데이터가 있으면 로딩/에러 무시하고 화면 표시
+  if (isLoading && !finalDetail) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -105,7 +174,7 @@ export default function APIDetailPage() {
     )
   }
 
-  if (error) {
+  if (error && !finalDetail) {
     return (
       <div className="text-center py-20 text-red-500 font-sans">
         <p>{error}</p>
@@ -120,26 +189,32 @@ export default function APIDetailPage() {
     )
   }
 
-  if (!apiDetail) return null
+  if (!finalDetail) return null
+
+  // 하드코딩 데이터에 pricingType이 있으면 그거 쓰고, 없으면 서버 데이터(pricingData) 사용
+  const pricingType = finalDetail.pricingType || pricingData?.pricingType || 'FREE'
+  const displayPricing = PRICING_LABEL[pricingType] ?? pricingType
 
   return (
-    <div className="mx-auto px-16 mt-32 2xl:mx-44">
+    <div className="mx-auto px-16 mt-32 2xl:mx-44 font-['Pretendard_Variable']">
       <div className="p-5">
-        {/* API 상세정보 + 로고 */}
+        {/* 상단 정보 */}
         <div className="mb-28">
           <div className="flex justify-between mx-auto items-center">
             <div className="flex flex-col justify-center gap-2 mt-3 w-full md:w-auto">
-              <h1 className="font-semibold text-[50px] text-info-darker mb-10">{apiDetail.name}</h1>
+              <h1 className="font-semibold text-[50px] text-info-darker mb-10">
+                {finalDetail.name}
+              </h1>
               <p className="font-medium text-2xl text-info-dark">
-                Star {apiDetail.avgRating.toFixed(1)}
+                Star {finalDetail.avgRating.toFixed(1)}
               </p>
               <p className="font-medium text-2xl text-info-dark mb-4">
-                {apiDetail.viewCounts.toLocaleString()} views
+                {finalDetail.viewCounts.toLocaleString()} views
               </p>
-              <p className="font-normal text-xl text-[#B0B0B0]">{apiDetail.summary}</p>
-              {apiDetail.officialUrl && (
+              <div className="text-zinc-400 text-xl font-normal mb-6">{displayPricing}</div>
+              {finalDetail.officialUrl && (
                 <a
-                  href={apiDetail.officialUrl}
+                  href={finalDetail.officialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-brand-500 text-lg font-medium hover:underline mt-2"
@@ -148,24 +223,23 @@ export default function APIDetailPage() {
                 </a>
               )}
             </div>
-            {/* API 로고 */}
             <div className="w-72 h-72 rounded-[60px] overflow-hidden flex items-center justify-center flex-shrink-0 bg-white shadow-[1px_5px_10px_0px_var(--tw-shadow-color)] shadow-brand-500/25 border border-brand-500/25 mt-10 md:mt-0">
-              {apiDetail.logo ? (
+              {finalDetail.logo ? (
                 <img
-                  src={apiDetail.logo}
-                  alt={apiDetail.name}
-                  className="w-full h-full object-contain"
+                  src={finalDetail.logo}
+                  alt={finalDetail.name}
+                  className="w-full h-full object-contain p-4"
                 />
               ) : (
                 <span className="text-brand-500 font-semibold text-6xl">
-                  {apiDetail.name.charAt(0).toUpperCase()}
+                  {finalDetail.name.charAt(0).toUpperCase()}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* 하트 및 공유 / 하단 메뉴 */}
+        {/* 하트 및 공유 */}
         <div className="m-2">
           <div className="flex gap-4 mb-10">
             <img
@@ -177,9 +251,9 @@ export default function APIDetailPage() {
             <img src={Share} alt="공유" />
           </div>
 
-          {/* 메뉴 탭 */}
+          {/* 탭 메뉴 */}
           <div>
-            <div className="flex gap-6 font-sans font-medium pb-6">
+            <div className="flex gap-6 font-sans font-medium pb-6 border-b border-[#EEEEEE]">
               {MENUS.map(({ key, label }) => (
                 <button
                   key={key}
@@ -192,16 +266,16 @@ export default function APIDetailPage() {
                 >
                   {label}
                   {activeMenu === key && (
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-full h-[1px] bg-info-dark/80" />
+                    <div className="absolute left-0 bottom-0 w-full h-[2px] bg-brand-500" />
                   )}
                 </button>
               ))}
             </div>
-            <div>
+            <div className="mt-8">
               {activeMenu === 'A' && (
                 <OverviewSection
-                  longDescription={apiDetail.longDescription}
-                  categories={apiDetail.categories}
+                  longDescription={finalDetail.longDescription || finalDetail.summary}
+                  categories={finalDetail.categories}
                 />
               )}
               {activeMenu === 'B' && <PricingSection />}
@@ -210,18 +284,16 @@ export default function APIDetailPage() {
             </div>
           </div>
 
-          {/* API 위키 (MD Editor 적용) */}
-          <div className="mt-10">
+          {/* 위키 영역 */}
+          <div className="mt-20">
             <div className="flex justify-between items-end mb-3">
               <span className="font-sans font-medium text-2xl text-info-dark">API 위키</span>
               <span className="text-gray-500 text-sm font-sans">
                 마지막 업데이트 버전: <span className="font-bold">{wikiData?.version ?? 0}</span>
               </span>
             </div>
-
             <div className="w-full max-w-[1112px] border border-brand-500 rounded-xl bg-white overflow-hidden p-4">
               {isEditing ? (
-                /* 수정 모드: 마크다운 에디터 */
                 <div data-color-mode="light">
                   <MDEditor
                     value={wikiText}
@@ -245,7 +317,6 @@ export default function APIDetailPage() {
                   </div>
                 </div>
               ) : (
-                /* 조회 모드: 마크다운 뷰어 */
                 <div data-color-mode="light">
                   {wikiData?.content ? (
                     <MDEditor.Markdown
@@ -266,6 +337,23 @@ export default function APIDetailPage() {
                       위키 수정하기
                     </button>
                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 비슷한 API 섹션 */}
+          <div className="mt-20 mb-20">
+            <div className="mb-6">
+              <span className="font-medium text-2xl text-info-darker">비슷한 API</span>
+            </div>
+
+            <div className="flex gap-6 overflow-x-auto pb-6 scroll-smooth scrollbar-hide">
+              {similarApisData?.content?.length ? (
+                similarApisData.content.map((api) => <APICardSmall key={api.apiId} {...api} />)
+              ) : (
+                <div className="text-gray-400 text-lg py-10 w-full text-center">
+                  비슷한 API가 없습니다.
                 </div>
               )}
             </div>
