@@ -22,20 +22,6 @@ export const postReview = async (
 }
 
 /**
- * 특정 API의 리뷰 목록 조회
- * GET /api/v1/apis/{apiId}/reviews
- */
-export const getApiReviews = async (
-  apiId: number,
-  params?: { page?: number; size?: number }
-): Promise<ApiResponse<any>> => {
-  const { data } = await axiosInstance.get<ApiResponse<any>>(`/api/v1/apis/${apiId}/reviews`, {
-    params,
-  })
-  return data
-}
-
-/**
  * 특정 API에 작성된 본인의 리뷰 삭제
  * DELETE /api/v1/apis/{apiId}/reviews/{reviewId}
  */
