@@ -144,7 +144,7 @@ const newsItems: NewsData[] = [
   },
 ]
 
-// -------------------- 3. ScrollableSection --------------------
+// -------------------- 3. ScrollableSection (드래그 & 휠 기능 통합 수정됨) --------------------
 const ScrollableSection = ({
   title,
   data,
@@ -156,54 +156,80 @@ const ScrollableSection = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [indicatorX, setIndicatorX] = useState(0)
+
+  // 드래그 상태 관리 (핸들과 컨텐츠 영역 통합 관리)
   const isDragging = useRef(false)
+  const dragTarget = useRef<'handle' | 'content' | null>(null)
   const startX = useRef(0)
+  const startScrollLeft = useRef(0)
   const startIndicatorX = useRef(0)
+
   const MAX_MOVE = 24
 
+  // 1. [휠 스크롤] 카드 영역에서 휠을 굴리면 가로로 이동
+  const handleWheel = (e: React.WheelEvent) => {
+    if (scrollRef.current) {
+      // 위아래 휠(deltaY)을 가로 스크롤값에 더해줌
+      scrollRef.current.scrollLeft += e.deltaY
+    }
+  }
+
+  // 2. [스크롤 동기화] 컨텐츠가 스크롤되면 하단 핸들 위치 업데이트
   const handleScroll = () => {
-    if (!scrollRef.current || isDragging.current) return
+    if (!scrollRef.current || dragTarget.current === 'handle') return
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
     const maxScroll = scrollWidth - clientWidth
-    if (maxScroll > 0) setIndicatorX((scrollLeft / maxScroll) * MAX_MOVE)
+    if (maxScroll > 0) {
+      setIndicatorX((scrollLeft / maxScroll) * MAX_MOVE)
+    }
   }
-  const onWheel = (e: React.WheelEvent) => {
-    if (scrollRef.current) scrollRef.current.scrollLeft += e.deltaY
-  }
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
+
+  // 3. [드래그 시작] 핸들 또는 카드 영역 클릭 시
+  const onDragStart = (e: React.MouseEvent, target: 'handle' | 'content') => {
     isDragging.current = true
+    dragTarget.current = target
     startX.current = e.clientX
+    if (scrollRef.current) startScrollLeft.current = scrollRef.current.scrollLeft
     startIndicatorX.current = indicatorX
-    // eslint-disable-next-line
-    document.body.style.userSelect = 'none'
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+
+    document.body.style.userSelect = 'none' // 드래그 중 텍스트 선택 방지
+    document.addEventListener('mousemove', onDragMove)
+    document.addEventListener('mouseup', onDragEnd)
   }
-  const handleMouseMove = (e: globalThis.MouseEvent) => {
+
+  // 4. [드래그 중] 움직임 계산
+  const onDragMove = (e: MouseEvent) => {
     if (!isDragging.current || !scrollRef.current) return
     const deltaX = e.clientX - startX.current
-    let newX = startIndicatorX.current + deltaX
-    if (newX < 0) newX = 0
-    if (newX > MAX_MOVE) newX = MAX_MOVE
-    setIndicatorX(newX)
-    const { scrollWidth, clientWidth } = scrollRef.current
-    const maxScroll = scrollWidth - clientWidth
-    scrollRef.current.scrollLeft = (newX / MAX_MOVE) * maxScroll
+
+    if (dragTarget.current === 'handle') {
+      // 스크롤바 핸들 드래그 시
+      let newX = Math.max(0, Math.min(startIndicatorX.current + deltaX, MAX_MOVE))
+      setIndicatorX(newX)
+      const { scrollWidth, clientWidth } = scrollRef.current
+      scrollRef.current.scrollLeft = (newX / MAX_MOVE) * (scrollWidth - clientWidth)
+    } else {
+      // 카드 컨텐츠 영역 드래그 시 (마우스 방향대로 스크롤)
+      // 드래그 중에는 smooth behavior를 잠시 꺼야 손가락을 잘 따라옵니다.
+      scrollRef.current.style.scrollBehavior = 'auto'
+      scrollRef.current.scrollLeft = startScrollLeft.current - deltaX
+    }
   }
-  const handleMouseUp = () => {
+
+  // 5. [드래그 종료]
+  const onDragEnd = () => {
     isDragging.current = false
-    // eslint-disable-next-line
+    dragTarget.current = null
+    if (scrollRef.current) scrollRef.current.style.scrollBehavior = 'smooth'
     document.body.style.userSelect = ''
-    document.removeEventListener('mousemove', handleMouseMove)
-    document.removeEventListener('mouseup', handleMouseUp)
+    document.removeEventListener('mousemove', onDragMove)
+    document.removeEventListener('mouseup', onDragEnd)
   }
+
   useEffect(() => {
     const el = scrollRef.current
     if (el) el.addEventListener('scroll', handleScroll)
-    return () => {
-      if (el) el.removeEventListener('scroll', handleScroll)
-    }
+    return () => el?.removeEventListener('scroll', handleScroll)
   }, [])
 
   if (!data || data.length === 0) return null
@@ -215,10 +241,15 @@ const ScrollableSection = ({
           {title}
         </div>
       </div>
+
+      {/* 카드 리스트 영역: 휠 스크롤 및 카드 드래그 이벤트 연결 */}
       <div
         ref={scrollRef}
-        onWheel={onWheel}
-        className="flex overflow-x-auto gap-6 pb-4 no-scrollbar scroll-smooth"
+        onWheel={handleWheel}
+        onMouseDown={(e) => onDragStart(e, 'content')}
+        className={`flex overflow-x-auto gap-6 pb-4 no-scrollbar scroll-smooth ${
+          isDragging.current && dragTarget.current === 'content' ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {type === 'api'
@@ -234,12 +265,13 @@ const ScrollableSection = ({
               />
             ))}
       </div>
+
+      {/* 하단 스크롤바 디자인 */}
       <div className="w-full flex justify-center mt-2">
         <div
-          className="relative w-20 h-6 flex items-center justify-center cursor-pointer touch-none"
-          onMouseDown={handleMouseDown}
+          className="relative w-20 h-6 flex items-center justify-center cursor-pointer"
+          onMouseDown={(e) => onDragStart(e, 'handle')}
         >
-          <div className="absolute inset-0 z-20" />
           <div className="relative w-20 mt-1 pointer-events-none">
             <div className="absolute inset-0 w-20 h-1 bg-[#D9D9D9] rounded-3xl" />
             <div
