@@ -28,6 +28,7 @@ const PRICING_LABEL: Record<string, string> = {
   MIXED: 'Free & Paid',
 }
 
+// 1. 기존 목데이터
 const MOCK_DATA: Record<number, ApiDetail & { pricingType?: string }> = {
   1: {
     apiId: 1,
@@ -78,6 +79,24 @@ const MOCK_DATA: Record<number, ApiDetail & { pricingType?: string }> = {
   },
 }
 
+// 2. 비상용 목데이터
+const FALLBACK_DETAIL: ApiDetail & { pricingType?: string } = {
+  apiId: 0,
+  name: 'API 정보 준비 중',
+  summary: '현재 해당 API에 대한 상세 정보를 업데이트하고 있습니다.',
+  longDescription:
+    '이 API는 아직 상세 정보가 등록되지 않았거나, 데이터베이스 연동이 준비 중입니다. 잠시 후 다시 시도해 주세요.',
+  officialUrl: '',
+  avgRating: 0,
+  viewCounts: 0,
+  categories: [{ categoryId: 0, name: 'Etc' }],
+  logo: '',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  isFavorited: false,
+  pricingType: 'FREE',
+}
+
 export default function APIDetailPage() {
   const { id } = useParams()
   const apiId = Number(id)
@@ -89,15 +108,17 @@ export default function APIDetailPage() {
     error,
     fetchApiDetail,
   } = useApiDetail()
+
   const { mutate: toggleFavorite, isLoading: isToggling } = usePostFavorite()
   const { data: wikiData, fetchWiki } = useWikiContent()
   const { saveWiki } = useWikiUpdate()
   const { data: similarApisData, fetchApiList } = useApiList()
-
-  // 수정됨: pricingData는 훅 내부에서 apiId를 인자로 받아 자동으로 처리됨
   const { pricing: pricingData } = useApiPricing(apiId)
 
-  const finalDetail = (MOCK_DATA[apiId] || serverApiDetail) as ApiDetail & { pricingType?: string }
+  // ✅ [수정 완료] 타입을 강제로 지정(as ...)하여 에러 해결!
+  const finalDetail = (serverApiDetail || MOCK_DATA[apiId] || FALLBACK_DETAIL) as ApiDetail & {
+    pricingType?: string
+  }
 
   const [localFavorite, setLocalFavorite] = useState<boolean | null>(null)
   const isFavorited = localFavorite ?? finalDetail?.isFavorited ?? false
@@ -110,12 +131,11 @@ export default function APIDetailPage() {
     if (apiId) {
       fetchApiDetail(apiId)
       fetchWiki(apiId)
-      // fetchApiPricing(apiId) -> 삭제됨: useApiPricing 훅 내부 useEffect에서 자동 호출됨
     }
   }, [apiId, fetchApiDetail, fetchWiki])
 
   useEffect(() => {
-    if (finalDetail?.categories?.length) {
+    if (finalDetail?.categories?.length && finalDetail.categories[0].categoryId !== 0) {
       fetchApiList({ categoryId: finalDetail.categories[0].categoryId, size: 5, sort: 'POPULAR' })
     } else if (finalDetail) {
       fetchApiList({ size: 5, sort: 'POPULAR' })
@@ -127,8 +147,10 @@ export default function APIDetailPage() {
     const nextStatus = !isFavorited
     setLocalFavorite(nextStatus)
     try {
-      const result = await toggleFavorite(apiId)
-      if (result.isFavorited !== nextStatus) setLocalFavorite(result.isFavorited)
+      if (apiId !== 0) {
+        const result = await toggleFavorite(apiId)
+        if (result.isFavorited !== nextStatus) setLocalFavorite(result.isFavorited)
+      }
     } catch {
       setLocalFavorite(!nextStatus)
     }
@@ -138,6 +160,10 @@ export default function APIDetailPage() {
     if (!displayWikiText.trim()) return alert('내용을 입력해주세요.')
     try {
       const currentVersion = wikiData?.version ?? 0
+      if (apiId === 0) {
+        alert('준비 중인 API는 위키를 수정할 수 없습니다.')
+        return
+      }
       await saveWiki(apiId, { content: displayWikiText, version: currentVersion })
       alert('위키가 저장되었습니다!')
       await fetchWiki(apiId)
@@ -160,14 +186,16 @@ export default function APIDetailPage() {
     setIsEditing(true)
   }
 
-  if (isDetailLoading && !finalDetail)
+  // 로딩 화면
+  if (isDetailLoading && !finalDetail && apiId !== 0)
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
 
-  if (error && !finalDetail)
+  // 에러 화면
+  if (error && !finalDetail && apiId !== 0)
     return (
       <div className="text-center py-20 text-red-500 font-sans">
         <p>{error}</p>
@@ -183,6 +211,7 @@ export default function APIDetailPage() {
 
   if (!finalDetail) return null
 
+  // ✅ 이제 pricingType 에러가 안 날 겁니다!
   const pricingType = finalDetail.pricingType || pricingData?.pricingType || 'FREE'
   const displayPricing = PRICING_LABEL[pricingType] ?? pricingType
 
