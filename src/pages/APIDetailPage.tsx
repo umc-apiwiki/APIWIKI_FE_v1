@@ -14,7 +14,14 @@ import { MobileHeader } from '@/components/mobile/MobileHeader'
 import { MobileBottomNavigation } from '@/components/mobile/MobileBottomNavigation'
 import { MobileReviewSection } from '@/components/mobile'
 
-import { useApiDetail, useWikiContent, useWikiUpdate, useApiList, useApiPricing, useDeviceDetect } from '@/hooks'
+import {
+  useApiDetail,
+  useWikiContent,
+  useWikiUpdate,
+  useApiList,
+  useApiPricing,
+  useDeviceDetect,
+} from '@/hooks'
 import { usePostFavorite } from '@/hooks/mutations/usePostFavorite'
 
 const MENUS = [

@@ -34,12 +34,7 @@ function StarRating({ score }: { score: number }) {
           )
         if (diff > 0) return <PartialStar key={idx} ratio={diff} />
         return (
-          <img
-            key={idx}
-            src={StarEmpty}
-            className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6"
-            alt="별"
-          />
+          <img key={idx} src={StarEmpty} className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6" alt="별" />
         )
       })}
     </div>
@@ -52,11 +47,7 @@ export default function ReviewSection() {
   const [showAllReviews, setShowAllReviews] = useState(false)
 
   /* API 데이터 불러오기 */
-  const {
-    data: reviewData,
-    isLoading: reviewsLoading,
-    refresh,
-  } = useReviews(Number(apiId), 0)
+  const { data: reviewData, isLoading: reviewsLoading, refresh } = useReviews(Number(apiId), 0)
 
   const { createReview, isLoading: postLoading } = usePostReview()
   const { profile: profileData } = useMyProfile()
