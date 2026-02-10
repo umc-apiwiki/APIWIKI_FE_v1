@@ -4,6 +4,7 @@ import APICard from '@/components/APICard'
 import { MobileAPICard } from '@/components/mobile/MobileAPICard'
 import SearchBar from '@/components/HomePage/SearchBar'
 import { MobileSearchModal } from '@/components/mobile/MobileSearchModal'
+import { MobileFilterModal } from '@/components/mobile/MobileFilterModal'
 import FilterModal from '@/components/modal/FilterModal'
 import CompareModal from '@/components/modal/CompareModal'
 import type { FilterValues } from '@/components/modal/FilterModal'
@@ -279,8 +280,20 @@ const ExplorePageContent = () => {
               <span>Filters</span>
               <img src={Filter} alt="필터" className="w-5 h-5 xs:w-6 xs:h-6" />
             </button>
-            {isFilterOpen && (
+            
+            {/* 데스크톱 필터 모달 */}
+            {!isMobile && isFilterOpen && (
               <FilterModal
+                onClose={() => setIsFilterOpen(false)}
+                onApply={handleFilterApply}
+                initialFilters={filterState}
+              />
+            )}
+            
+            {/* 모바일 필터 모달 */}
+            {isMobile && (
+              <MobileFilterModal
+                isOpen={isFilterOpen}
                 onClose={() => setIsFilterOpen(false)}
                 onApply={handleFilterApply}
                 initialFilters={filterState}
