@@ -9,6 +9,13 @@ import NewsCard from '@/components/NewsCard'
 import type { ApiPreview } from '@/types/api'
 import { useApiList } from '@/hooks'
 
+// 모바일 디바이스 감지
+const isMobileDevice = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  )
+}
+
 // -------------------- 1. 타겟 설정 (화면에 보여줄 하드코딩 데이터) --------------------
 
 interface TargetConfig {
@@ -284,6 +291,13 @@ const HomePage = () => {
   const [showMore, setShowMore] = useState(false)
 
   const { data: serverData, fetchApiList } = useApiList()
+
+  // 모바일 디바이스 감지 및 리다이렉트
+  useEffect(() => {
+    if (isMobileDevice()) {
+      navigate('/mobile')
+    }
+  }, [navigate])
 
   useEffect(() => {
     fetchApiList({ sort: 'POPULAR', size: 100 })

@@ -20,3 +20,20 @@
     @apply min-h-screen;
   }
 }
+
+/* 모바일 네비게이션 숨김 클래스 */
+body.hide-mobile-nav nav {
+  display: none !important;
+}
+
+/* 스크롤바 숨김 유틸리티 */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
