@@ -10,6 +10,8 @@ import type { ApiListParams, SortOption, ApiPreview } from '@/types/api'
 import { usePostFavorite } from '@/hooks/mutations/usePostFavorite'
 import { CompareProvider } from '@/context/CompareProvider'
 import { useCompare } from '@/hooks/useCompare'
+import { MobileHeader } from '@/components/mobile/MobileHeader'
+import { MobileBottomNavigation } from '@/components/mobile/MobileBottomNavigation'
 
 import Filter from '@/assets/icons/action/ic_filter.svg'
 import ArrowDown from '@/assets/icons/action/ic_arrow_down.svg'
@@ -210,7 +212,9 @@ const ExplorePageContent = () => {
   const currentSort = SORT_OPTIONS.find((o) => o.value === params.sort) ?? SORT_OPTIONS[0]
 
   return (
-    <div className="mt-10">
+    <>
+      <MobileHeader />
+      <div className="mt-10 pb-20">
       <SearchBar isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} onSearch={handleSearch} />
 
       <div className="mt-8">
@@ -346,7 +350,9 @@ const ExplorePageContent = () => {
         onRemove={removeFromCompare}
         onClear={clearCompare}
       />
-    </div>
+      </div>
+      <MobileBottomNavigation />
+    </>
   )
 }
 

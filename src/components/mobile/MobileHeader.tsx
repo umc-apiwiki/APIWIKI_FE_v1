@@ -7,8 +7,8 @@
 import { Link } from 'react-router-dom'
 
 export const MobileHeader = () => {
+  // 모바일 상단 헤더: 768px 미만에서만 표시
   return (
-    {/* 모바일 상단 헤더: 768px 미만에서만 표시 */}
     <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 md:hidden">
       <div className="flex items-center justify-between px-4 h-14">
         {/* 로고 */}

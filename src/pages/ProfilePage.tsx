@@ -2,6 +2,8 @@ import { motion } from 'framer-motion'
 import profileImg from '@/assets/default_profile.png'
 import editIcon from '@/assets/icons/common/ic_edit.svg'
 import { useMyProfile } from '@/hooks/useUser'
+import { MobileHeader } from '@/components/mobile/MobileHeader'
+import { MobileBottomNavigation } from '@/components/mobile/MobileBottomNavigation'
 
 const ProfilePage = () => {
   const { profile, isLoading, error } = useMyProfile()
@@ -14,8 +16,10 @@ const ProfilePage = () => {
   if (error) return <div className="pt-40 text-center text-red-500">에러 발생</div>
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] relative overflow-hidden pt-10 pb-20">
-      <div className="z-10 flex flex-col items-center gap-10">
+    <>
+      <MobileHeader />
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] relative overflow-hidden pt-10 pb-20">
+        <div className="z-10 flex flex-col items-center gap-10">
         {/* Title */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -88,8 +92,10 @@ const ProfilePage = () => {
             <span className="text-zinc-400 text-base font-normal">회원 탈퇴</span>
           </button>
         </motion.div>
+        </div>
       </div>
-    </div>
+      <MobileBottomNavigation />
+    </>
   )
 }
 

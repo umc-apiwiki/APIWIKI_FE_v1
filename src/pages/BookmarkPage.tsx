@@ -2,6 +2,8 @@ import APICard from '@/components/APICard'
 import BookmarkCarousel from '@/components/BookmarkCarousel'
 import { useBookmark } from '@/hooks/useBookmark'
 import { formatDate } from '@/utils/formatDate'
+import { MobileHeader } from '@/components/mobile/MobileHeader'
+import { MobileBottomNavigation } from '@/components/mobile/MobileBottomNavigation'
 
 /**
  * BookmarkPage
@@ -44,7 +46,9 @@ const BookmarkPage = () => {
   }
 
   return (
-    <div className="w-full min-h-screen pb-40 overflow-x-hidden mt-10">
+    <>
+      <MobileHeader />
+      <div className="w-full min-h-screen pb-40 overflow-x-hidden mt-10">
       <div className="flex flex-col w-full max-w-[1444px] mx-auto">
         <div className="w-full flex justify-center mb-16">
           <div className="text-slate-900 text-3xl font-medium tracking-widest">Archive</div>
@@ -80,6 +84,8 @@ const BookmarkPage = () => {
         )}
       </div>
     </div>
+    <MobileBottomNavigation />
+    </>
   )
 }
 
