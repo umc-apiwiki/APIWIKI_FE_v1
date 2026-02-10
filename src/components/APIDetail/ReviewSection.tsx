@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useReviews, usePostReview, useMyProfile } from '@/hooks'
 import Review from './Review'
+import Pagination from '@/components/Pagination'
 import StarFilled from '@/assets/icons/common/ic_star_filled.svg'
 import StarEmpty from '@/assets/icons/common/ic_star_empty.svg'
 
@@ -44,10 +45,15 @@ function StarRating({ score }: { score: number }) {
 export default function ReviewSection() {
   const { apiId } = useParams<{ apiId: string }>()
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
-  const [showAllReviews, setShowAllReviews] = useState(false)
 
   /* API 데이터 불러오기 */
-  const { data: reviewData, isLoading: reviewsLoading, refresh } = useReviews(Number(apiId), 0)
+  const {
+    data: reviewData,
+    isLoading: reviewsLoading,
+    refresh,
+    currentPage,
+    goToPage,
+  } = useReviews(Number(apiId), 0)
 
   const { createReview, isLoading: postLoading } = usePostReview()
   const { profile: profileData } = useMyProfile()
@@ -84,10 +90,8 @@ export default function ReviewSection() {
   const totalRating = reviewData?.totalRating ?? 0
   const reviewCount = reviewData?.reviewCount ?? 0
   const reviewList = reviewData?.reviews.content ?? []
+  const totalPages = reviewData?.reviews.totalPage ?? 0
   const currentUserNickname = profileData?.nickname || null
-
-  /* 표시할 리뷰 개수 제한 */
-  const displayedReviews = showAllReviews ? reviewList : reviewList.slice(0, 5)
 
   return (
     <div className="flex flex-col">
@@ -180,7 +184,7 @@ export default function ReviewSection() {
             <p className="text-gray-500">리뷰를 불러오는 중...</p>
           </div>
         ) : reviewList.length > 0 ? (
-          displayedReviews.map((review) => (
+          reviewList.map((review) => (
             <Review
               key={review.reviewId}
               reviewId={review.reviewId}
@@ -203,22 +207,14 @@ export default function ReviewSection() {
         )}
       </div>
 
-      {reviewList.length > 5 && !showAllReviews && (
-        <button
-          onClick={() => setShowAllReviews(true)}
-          className="font-medium text-brand-500 text-sm xs:text-base md:text-lg lg:text-[22px] mt-6 xs:mt-8 md:mt-10 mb-6 xs:mb-8 md:mb-10 cursor-pointer hover:text-brand-600 transition-colors"
-        >
-          리뷰 모두 보기 ({reviewList.length}개)
-        </button>
-      )}
-
-      {showAllReviews && reviewList.length > 5 && (
-        <button
-          onClick={() => setShowAllReviews(false)}
-          className="font-medium text-gray-500 text-sm xs:text-base md:text-lg lg:text-[22px] mt-6 xs:mt-8 md:mt-10 mb-6 xs:mb-8 md:mb-10 cursor-pointer hover:text-gray-700 transition-colors"
-        >
-          리뷰 접기
-        </button>
+      {/* 페이지네이션 */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          className="mt-8 xs:mt-10 md:mt-12"
+        />
       )}
     </div>
   )

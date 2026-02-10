@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useReviews, usePostReview, useMyProfile } from '@/hooks'
 import MobileReview from './MobileReview'
+import Pagination from '@/components/Pagination'
 import StarFilled from '@/assets/icons/common/ic_star_filled.svg'
 import StarEmpty from '@/assets/icons/common/ic_star_empty.svg'
 
@@ -34,10 +35,15 @@ function StarRating({ score }: { score: number }) {
 export default function MobileReviewSection() {
   const { apiId } = useParams<{ apiId: string }>()
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
-  const [showAllReviews, setShowAllReviews] = useState(false)
 
   /* API 데이터 불러오기 */
-  const { data: reviewData, isLoading: reviewsLoading, refresh } = useReviews(Number(apiId), 0)
+  const {
+    data: reviewData,
+    isLoading: reviewsLoading,
+    refresh,
+    currentPage,
+    goToPage,
+  } = useReviews(Number(apiId), 0)
 
   const { createReview, isLoading: postLoading } = usePostReview()
   const { profile: profileData } = useMyProfile()
@@ -72,10 +78,8 @@ export default function MobileReviewSection() {
   const totalRating = reviewData?.totalRating ?? 0
   const reviewCount = reviewData?.reviewCount ?? 0
   const reviewList = reviewData?.reviews.content ?? []
+  const totalPages = reviewData?.reviews.totalPage ?? 0
   const currentUserNickname = profileData?.nickname || null
-
-  /* 표시할 리뷰 개수 제한 (모바일은 처음에 3개만) */
-  const displayedReviews = showAllReviews ? reviewList : reviewList.slice(0, 3)
 
   return (
     <div className="flex flex-col px-4 py-6">
@@ -159,7 +163,7 @@ export default function MobileReviewSection() {
             <p className="text-gray-500 text-sm">리뷰를 불러오는 중...</p>
           </div>
         ) : reviewList.length > 0 ? (
-          displayedReviews.map((review) => (
+          reviewList.map((review) => (
             <MobileReview
               key={review.reviewId}
               reviewId={review.reviewId}
@@ -182,23 +186,14 @@ export default function MobileReviewSection() {
         )}
       </div>
 
-      {/* 더보기/접기 버튼 */}
-      {reviewList.length > 3 && !showAllReviews && (
-        <button
-          onClick={() => setShowAllReviews(true)}
-          className="font-medium text-brand-500 text-sm mt-6 cursor-pointer hover:text-brand-600 transition-colors"
-        >
-          리뷰 모두 보기 ({reviewList.length}개)
-        </button>
-      )}
-
-      {showAllReviews && reviewList.length > 3 && (
-        <button
-          onClick={() => setShowAllReviews(false)}
-          className="font-medium text-gray-500 text-sm mt-6 cursor-pointer hover:text-gray-700 transition-colors"
-        >
-          리뷰 접기
-        </button>
+      {/* 페이지네이션 */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          className="mt-6"
+        />
       )}
     </div>
   )
