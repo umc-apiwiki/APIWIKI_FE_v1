@@ -11,12 +11,19 @@ export const MobileBottomNavigation = () => {
   const {
     isLoginModalOpen,
     isSignupModalOpen,
+    loginForm,
+    signupForm,
     handleProfileClick,
     handleSwitchToSignup,
     handleSwitchToLogin,
     setIsLoginModalOpen,
     setIsSignupModalOpen,
     isActive,
+    handleLoginChange,
+    handleSignupChange,
+    handleLoginSubmit,
+    handleSignupSubmit,
+    isLoading,
   } = useMobileNavigation()
 
   const navItems = [
@@ -134,6 +141,8 @@ export const MobileBottomNavigation = () => {
                 <label className="text-xs xs:text-sm font-semibold text-gray-700">이메일</label>
                 <input
                   type="email"
+                  value={loginForm.email}
+                  onChange={(e) => handleLoginChange('email', e.target.value)}
                   className="px-3 xs:px-4 py-2 border border-gray-300 rounded-lg text-xs xs:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="이메일을 입력하세요"
                 />
@@ -142,18 +151,30 @@ export const MobileBottomNavigation = () => {
                 <label className="text-xs xs:text-sm font-semibold text-gray-700">비밀번호</label>
                 <input
                   type="password"
+                  value={loginForm.password}
+                  onChange={(e) => handleLoginChange('password', e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isLoading) {
+                      handleLoginSubmit()
+                    }
+                  }}
                   className="px-3 xs:px-4 py-2 border border-gray-300 rounded-lg text-xs xs:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="비밀번호를 입력하세요"
                 />
               </div>
             </div>
             <div className="flex flex-col gap-2 mt-4 xs:mt-5 sm:mt-6">
-              <button className="px-5 xs:px-6 py-2 bg-blue-500 text-white rounded-lg text-sm xs:text-base font-semibold text-center transition-all hover:bg-blue-600 active:scale-98">
-                로그인
+              <button
+                onClick={handleLoginSubmit}
+                disabled={isLoading}
+                className="px-5 xs:px-6 py-2 bg-blue-500 text-white rounded-lg text-sm xs:text-base font-semibold text-center transition-all hover:bg-blue-600 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? '로그인 중...' : '로그인'}
               </button>
               <button
                 onClick={handleSwitchToSignup}
-                className="px-2 py-1 bg-transparent text-xs xs:text-sm text-gray-600 text-center cursor-pointer hover:text-gray-900"
+                disabled={isLoading}
+                className="px-2 py-1 bg-transparent text-xs xs:text-sm text-gray-600 text-center cursor-pointer hover:text-gray-900 disabled:opacity-50"
               >
                 회원가입으로
               </button>
@@ -178,26 +199,50 @@ export const MobileBottomNavigation = () => {
                 <label className="text-xs xs:text-sm font-semibold text-gray-700">이메일</label>
                 <input
                   type="email"
+                  value={signupForm.email}
+                  onChange={(e) => handleSignupChange('email', e.target.value)}
                   className="px-3 xs:px-4 py-2 border border-gray-300 rounded-lg text-xs xs:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="이메일을 입력하세요"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 xs:gap-2">
+                <label className="text-xs xs:text-sm font-semibold text-gray-700">닉네임</label>
+                <input
+                  type="text"
+                  value={signupForm.nickname}
+                  onChange={(e) => handleSignupChange('nickname', e.target.value)}
+                  className="px-3 xs:px-4 py-2 border border-gray-300 rounded-lg text-xs xs:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  placeholder="닉네임을 입력하세요"
                 />
               </div>
               <div className="flex flex-col gap-1.5 xs:gap-2">
                 <label className="text-xs xs:text-sm font-semibold text-gray-700">비밀번호</label>
                 <input
                   type="password"
+                  value={signupForm.password}
+                  onChange={(e) => handleSignupChange('password', e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isLoading) {
+                      handleSignupSubmit()
+                    }
+                  }}
                   className="px-3 xs:px-4 py-2 border border-gray-300 rounded-lg text-xs xs:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="비밀번호를 입력하세요"
                 />
               </div>
             </div>
             <div className="flex flex-col gap-2 mt-4 xs:mt-5 sm:mt-6">
-              <button className="px-5 xs:px-6 py-2 bg-blue-500 text-white rounded-lg text-sm xs:text-base font-semibold text-center transition-all hover:bg-blue-600 active:scale-98">
-                회원가입
+              <button
+                onClick={handleSignupSubmit}
+                disabled={isLoading}
+                className="px-5 xs:px-6 py-2 bg-blue-500 text-white rounded-lg text-sm xs:text-base font-semibold text-center transition-all hover:bg-blue-600 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? '회원가입 중...' : '회원가입'}
               </button>
               <button
                 onClick={handleSwitchToLogin}
-                className="px-2 py-1 bg-transparent text-xs xs:text-sm text-gray-600 text-center cursor-pointer hover:text-gray-900"
+                disabled={isLoading}
+                className="px-2 py-1 bg-transparent text-xs xs:text-sm text-gray-600 text-center cursor-pointer hover:text-gray-900 disabled:opacity-50"
               >
                 로그인으로
               </button>

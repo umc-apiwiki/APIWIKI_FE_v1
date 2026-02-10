@@ -2,11 +2,19 @@ import { motion } from 'framer-motion'
 import profileImg from '@/assets/default_profile.png'
 import editIcon from '@/assets/icons/common/ic_edit.svg'
 import { useMyProfile } from '@/hooks/useUser'
+import { useAuth } from '@/hooks/useAuth'
 import { MobileHeader } from '@/components/mobile/MobileHeader'
 import { MobileBottomNavigation } from '@/components/mobile/MobileBottomNavigation'
 
 const ProfilePage = () => {
   const { profile, isLoading, error } = useMyProfile()
+  const { logout } = useAuth()
+
+  const handleLogout = async () => {
+    if (confirm('로그아웃 하시겠습니까?')) {
+      await logout()
+    }
+  }
 
   const inputBaseStyle =
     'w-full max-w-[280px] xs:max-w-[320px] sm:max-w-[360px] h-11 xs:h-12 bg-white rounded-[30px] shadow-[0px_3px_5px_0px_rgba(224,224,233,0.25)] border border-zinc-200 outline-none focus:border-brand-500 transition-colors px-4 xs:px-5 sm:px-6 text-sm xs:text-base font-medium text-slate-900 placeholder:text-stone-300'
@@ -103,13 +111,19 @@ const ProfilePage = () => {
             </div>
           </motion.div>
 
-          {/* Delete Account */}
+          {/* Logout and Delete Account */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="mt-3 xs:mt-4 md:mt-5 w-full px-2"
+            className="mt-3 xs:mt-4 md:mt-5 w-full px-2 flex flex-col gap-2 xs:gap-3"
           >
+            <button
+              onClick={handleLogout}
+              className="w-full max-w-[280px] xs:max-w-[320px] sm:max-w-[360px] h-11 xs:h-12 sm:h-13 bg-brand-500 rounded-[30px] shadow-[0px_3px_5px_0px_rgba(33,150,243,0.25)] flex justify-center items-center hover:bg-brand-600 transition-colors cursor-pointer mx-auto"
+            >
+              <span className="text-white text-sm xs:text-base font-semibold">로그아웃</span>
+            </button>
             <button className="w-full max-w-[280px] xs:max-w-[320px] sm:max-w-[360px] h-11 xs:h-12 sm:h-13 bg-white rounded-[30px] shadow-[0px_3px_5px_0px_rgba(224,224,233,0.25)] border border-zinc-200 flex justify-center items-center hover:bg-slate-50 transition-colors cursor-pointer mx-auto">
               <span className="text-zinc-400 text-sm xs:text-base font-normal">회원 탈퇴</span>
             </button>
