@@ -56,7 +56,6 @@ export default function ReviewSection() {
     data: reviewData,
     isLoading: reviewsLoading,
     refresh,
-    goToPage,
   } = useReviews(Number(apiId), 0)
 
   const { createReview, isLoading: postLoading } = usePostReview()
