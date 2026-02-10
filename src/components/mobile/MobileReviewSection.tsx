@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { useReviews, usePostReview, useMyProfile } from '@/hooks'
+import { useReviews, usePostReview, useAuth } from '@/hooks'
 import MobileReview from './MobileReview'
 import Pagination from '@/components/Pagination'
 import StarFilled from '@/assets/icons/common/ic_star_filled.svg'
@@ -33,8 +33,10 @@ function StarRating({ score }: { score: number }) {
 }
 
 export default function MobileReviewSection() {
-  const { apiId } = useParams<{ apiId: string }>()
+  const { id } = useParams<{ id: string }>()
+  const apiId = Number(id) || 0
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
+  const { accessToken } = useAuth()
 
   /* API 데이터 불러오기 */
   const {
@@ -43,10 +45,9 @@ export default function MobileReviewSection() {
     refresh,
     currentPage,
     goToPage,
-  } = useReviews(Number(apiId), 0)
+  } = useReviews(apiId, 0)
 
   const { createReview, isLoading: postLoading } = usePostReview()
-  const { profile: profileData } = useMyProfile()
 
   /* 평점 분포 계산 (useMemo로 변경) */
   const ratingDistribution = useMemo(() => {
@@ -60,18 +61,28 @@ export default function MobileReviewSection() {
     })
   }, [reviewData])
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    /* 로그인 체크 */
+    if (!accessToken) {
+      alert('로그인이 필요한 기능입니다. 로그인 후 이용해주세요.')
+      return
+    }
+
     if (!newReview.comment.trim()) {
       alert('리뷰 내용을 입력해주세요.')
       return
     }
-    if (!apiId) return
+    if (!apiId || apiId === 0) return
 
-    createReview(Number(apiId), newReview, () => {
+    const result = await createReview(apiId, newReview)
+
+    if (result?.success) {
       alert('리뷰가 등록되었습니다.')
       setNewReview({ rating: 5, comment: '' })
       refresh()
-    })
+    } else if (result?.error) {
+      alert(result.error)
+    }
   }
 
   /* 데이터 기본값 설정 */
@@ -79,7 +90,6 @@ export default function MobileReviewSection() {
   const reviewCount = reviewData?.reviewCount ?? 0
   const reviewList = reviewData?.reviews.content ?? []
   const totalPages = reviewData?.reviews.totalPage ?? 0
-  const currentUserNickname = profileData?.nickname || null
 
   return (
     <div className="flex flex-col px-4 py-6">
@@ -165,8 +175,7 @@ export default function MobileReviewSection() {
         ) : reviewList.length > 0 ? (
           reviewList.map((review) => (
             <MobileReview
-              key={review.reviewId}
-              reviewId={review.reviewId}
+              key={`${review.nickname}-${review.createdAt}`}
               name={review.nickname}
               score={Math.floor(review.rating)}
               text={review.comment}
@@ -175,8 +184,6 @@ export default function MobileReviewSection() {
                 month: 'long',
                 day: 'numeric',
               })}
-              isMine={currentUserNickname === review.nickname}
-              onDeleteSuccess={refresh}
             />
           ))
         ) : (

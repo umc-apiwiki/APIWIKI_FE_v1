@@ -33,7 +33,9 @@ export const useReviews = (apiId: number, initialPage: number = 0) => {
 
   /* 초기 로딩 */
   useEffect(() => {
-    fetchReviews(initialPage)
+    if (apiId && apiId > 0) {
+      fetchReviews(initialPage)
+    }
   }, [apiId, initialPage, fetchReviews])
 
   /* 페이지 변경 함수 */
