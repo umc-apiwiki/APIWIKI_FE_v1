@@ -90,7 +90,7 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        enabled: true,
+        enabled: false, // 개발 모드에서는 PWA 비활성화 (프로덕션 빌드에서만 사용)
         type: 'module',
       },
     }),
