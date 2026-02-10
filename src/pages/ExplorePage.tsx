@@ -242,10 +242,10 @@ const ExplorePageContent = () => {
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="w-full bg-gray-100 rounded-lg xs:rounded-xl px-3 xs:px-4 py-2 xs:py-2.5 sm:py-3 flex items-center gap-2 text-left text-gray-400 text-xs xs:text-sm sm:text-base"
+            className="w-full bg-white rounded-[25px] xs:rounded-[30px] shadow-[1px_1px_5px_2px_var(--tw-shadow-color)] shadow-brand-500/25 border border-brand-500/25 hover:border-brand-500/50 transition-all px-4 xs:px-5 py-2.5 xs:py-3 flex items-center gap-2 text-left"
           >
-            <img src={SearchLine} alt="Search" width={20} height={20} />
-            <span>궁금한 API를 검색해보세요</span>
+            <span className="text-slate-400 text-xs xs:text-sm sm:text-base font-medium flex-1">궁금한 API를 검색해보세요</span>
+            <img src={SearchLine} alt="Search" width={20} height={20} className="flex-shrink-0" />
           </button>
         </div>
       )}
