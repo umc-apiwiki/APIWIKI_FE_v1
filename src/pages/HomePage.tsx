@@ -9,11 +9,12 @@ import NewsCard from '@/components/NewsCard'
 import type { ApiPreview } from '@/types/api'
 import { useApiList } from '@/hooks'
 
-// -------------------- 1. 타겟 설정 --------------------
+// -------------------- 1. 타겟 설정 (화면에 보여줄 하드코딩 데이터) --------------------
+
 interface TargetConfig {
-  dbName: string
-  localImage: string
-  fallbackTitle: string
+  dbName: string // DB 매칭 시도용 이름
+  localImage: string // 로컬 이미지 경로
+  fallbackTitle: string // 화면에 보여줄 제목 (무조건 이거 사용)
   mockRating: number
   mockReviews: number
   mockPrice: string
@@ -153,8 +154,9 @@ const ScrollableSection = ({
   const scrollRef = useRef<HTMLDivElement>(null)
   const [indicatorX, setIndicatorX] = useState(0)
 
-  // ✅ 린트 에러 해결을 위한 드래그 활성화 상태 추가
+  // 드래그 상태 관리 (Lint 에러 해결을 위해 State로 관리)
   const [isDragActive, setIsDragActive] = useState(false)
+  const [activeTarget, setActiveTarget] = useState<'handle' | 'content' | null>(null)
 
   const isDragging = useRef(false)
   const dragTarget = useRef<'handle' | 'content' | null>(null)
@@ -164,7 +166,7 @@ const ScrollableSection = ({
 
   const MAX_MOVE = 24
 
-  // ✅ [린트 해결] document.body 조작은 useEffect에서 처리
+  // [Lint 해결] document.body 직접 수정을 useEffect로 이동
   useEffect(() => {
     if (isDragActive) {
       document.body.style.userSelect = 'none'
@@ -185,7 +187,8 @@ const ScrollableSection = ({
 
   const onDragStart = (e: React.MouseEvent, target: 'handle' | 'content') => {
     isDragging.current = true
-    setIsDragActive(true) // 드래그 상태 활성화 (Effect 트리거)
+    setIsDragActive(true)
+    setActiveTarget(target)
     dragTarget.current = target
     startX.current = e.clientX
     if (scrollRef.current) startScrollLeft.current = scrollRef.current.scrollLeft
@@ -199,6 +202,7 @@ const ScrollableSection = ({
   const onDragMove = (e: MouseEvent) => {
     if (!isDragging.current || !scrollRef.current) return
     const deltaX = e.clientX - startX.current
+
     if (dragTarget.current === 'handle') {
       const newX = Math.max(0, Math.min(startIndicatorX.current + deltaX, MAX_MOVE))
       setIndicatorX(newX)
@@ -212,7 +216,8 @@ const ScrollableSection = ({
 
   const onDragEnd = () => {
     isDragging.current = false
-    setIsDragActive(false) // 드래그 상태 해제 (Effect 트리거)
+    setIsDragActive(false)
+    setActiveTarget(null)
     dragTarget.current = null
     if (scrollRef.current) scrollRef.current.style.scrollBehavior = 'smooth'
 
@@ -240,9 +245,10 @@ const ScrollableSection = ({
       <div
         ref={scrollRef}
         onMouseDown={(e) => onDragStart(e, 'content')}
+        // 이미지 드래그 방지 (중요)
         onDragStart={(e) => e.preventDefault()}
         className={`flex overflow-x-auto gap-6 pb-4 no-scrollbar scroll-smooth ${
-          isDragging.current && dragTarget.current === 'content' ? 'cursor-grabbing' : 'cursor-grab'
+          activeTarget === 'content' ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -279,32 +285,43 @@ const ScrollableSection = ({
 }
 
 // -------------------- 4. HomePage Component --------------------
+
 const HomePage = () => {
   const navigate = useNavigate()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [showMore, setShowMore] = useState(false)
+
   const { data: serverData, fetchApiList } = useApiList()
 
   useEffect(() => {
     fetchApiList({ sort: 'POPULAR', size: 100 })
   }, [fetchApiList])
 
+  // ✅ [수정된 로직] 화면은 하드코딩 데이터 강제 + 링크는 서버 ID 연결
   const mergeData = (targets: TargetConfig[], fetchedList: ApiPreview[] = []) => {
     return targets.map((target) => {
+      // 1. 실제 DB에 해당 API가 있는지 확인
       const realData = fetchedList.find((item) => item.name === target.dbName)
+
+      // 2. 링크 연결할 ID 결정 (중요!)
+      // - 진짜 데이터가 있으면 그 ID (예: 12)
+      // - 없으면? 서버 리스트의 "첫 번째 API ID"를 빌려옴 (예: 5) -> 이렇게 하면 404 안 뜸
+      // - 서버 리스트도 비었으면? 그냥 1번 (예비용)
       const linkedApiId = realData?.apiId ?? fetchedList[0]?.apiId ?? 1
+
+      // 3. 리턴되는 데이터: 화면에 보여줄 내용은 무조건 target(하드코딩) 값 사용
       return {
-        apiId: linkedApiId,
-        name: target.fallbackTitle,
+        apiId: linkedApiId, // 클릭 시 이동할 ID (실제 존재하는 페이지로 납치)
+        name: target.fallbackTitle, // 이름은 하드코딩된 값 (예: Gmail)
         summary: '주요 기능을 제공하는 인기 API입니다.',
-        avgRating: target.mockRating,
-        reviewCount: target.mockReviews,
+        avgRating: target.mockRating, // 별점도 하드코딩
+        reviewCount: target.mockReviews, // 리뷰 수도 하드코딩
         viewCounts: target.mockReviews * 150,
         pricingType: target.mockPrice,
         authType: 'API_KEY',
         providerCompany: 'ETC',
         isFavorited: false,
-        logo: target.localImage,
+        logo: target.localImage, // 로고도 하드코딩
       } as unknown as ApiPreview
     })
   }
@@ -339,18 +356,24 @@ const HomePage = () => {
   return (
     <div className="w-full flex flex-col items-center justify-center min-h-screen">
       <div className="w-full flex flex-col items-center pt-24 pb-24 animate-slide-up">
+        {/* 뉴스 섹션 */}
         <ScrollableSection title="Latest News" data={newsItems} type="news" />
+
+        {/* Popular API (하드코딩 비주얼 + 실제 링크) */}
         <ScrollableSection
           title="Recent Popular"
           data={mergeData(TARGET_POPULAR, serverData?.content)}
           type="api"
         />
+
+        {/* Suggest API (하드코딩 비주얼 + 실제 링크) */}
         <ScrollableSection
           title="Suggest API"
           data={mergeData(TARGET_SUGGEST, serverData?.content)}
           type="api"
         />
       </div>
+
       <BottomButtonSection onClick={toggleView} isExpanded={true} />
     </div>
   )

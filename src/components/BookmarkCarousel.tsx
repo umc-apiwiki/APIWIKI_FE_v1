@@ -10,8 +10,9 @@ export default function BookmarkCarousel({ date, children }: BookmarkCarouselPro
   const scrollRef = useRef<HTMLDivElement>(null)
   const [indicatorX, setIndicatorX] = useState(0)
 
-  // ✅ 린트 에러 해결을 위한 상태 추가
+  // 린트 에러 해결을 위한 상태 관리
   const [isDragActive, setIsDragActive] = useState(false)
+  const [activeTarget, setActiveTarget] = useState<'handle' | 'content' | null>(null)
 
   const isDragging = useRef(false)
   const dragTarget = useRef<'handle' | 'content' | null>(null)
@@ -21,7 +22,7 @@ export default function BookmarkCarousel({ date, children }: BookmarkCarouselPro
 
   const MAX_MOVE = 24
 
-  // ✅ [린트 해결] 사이드 이펙트는 useEffect에서 관리
+  // [Lint 해결] document.body 스타일 변경은 useEffect에서 처리
   useEffect(() => {
     if (isDragActive) {
       document.body.style.userSelect = 'none'
@@ -42,7 +43,8 @@ export default function BookmarkCarousel({ date, children }: BookmarkCarouselPro
 
   const onDragStart = (e: React.MouseEvent, target: 'handle' | 'content') => {
     isDragging.current = true
-    setIsDragActive(true) // 드래그 활성화
+    setIsDragActive(true)
+    setActiveTarget(target)
     dragTarget.current = target
     startX.current = e.clientX
     if (scrollRef.current) startScrollLeft.current = scrollRef.current.scrollLeft
@@ -50,6 +52,7 @@ export default function BookmarkCarousel({ date, children }: BookmarkCarouselPro
 
     document.addEventListener('mousemove', onDragMove)
     document.addEventListener('mouseup', onDragEnd)
+    // 안전장치 추가
     document.addEventListener('mouseleave', onDragEnd)
   }
 
@@ -70,7 +73,8 @@ export default function BookmarkCarousel({ date, children }: BookmarkCarouselPro
 
   const onDragEnd = () => {
     isDragging.current = false
-    setIsDragActive(false) // 드래그 해제
+    setIsDragActive(false)
+    setActiveTarget(null)
     dragTarget.current = null
 
     if (scrollRef.current) {
@@ -94,9 +98,10 @@ export default function BookmarkCarousel({ date, children }: BookmarkCarouselPro
       <div
         ref={scrollRef}
         onMouseDown={(e) => onDragStart(e, 'content')}
+        // ✅ [핵심] 여기서 기본 드래그 막음 (로고 드래그 시 스크롤 되도록)
         onDragStart={(e) => e.preventDefault()}
         className={`flex gap-10 overflow-x-auto pb-4 pr-10 px-4 lg:px-0 no-scrollbar select-none ${
-          isDragging.current && dragTarget.current === 'content' ? 'cursor-grabbing' : 'cursor-grab'
+          activeTarget === 'content' ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={{
           scrollbarWidth: 'none',
