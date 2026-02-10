@@ -61,7 +61,7 @@ export default function APICard({
     >
       {/* 카드 배경 */}
       <div className="absolute inset-0 rounded-[15px] border-brand-500/30 border-thin bg-white shadow-[1px_5px_10px_0px_var(--tw-shadow-color)] shadow-brand-500/25 group-hover:bg-gradient-to-b group-hover:from-brand-500/15 group-hover:to-white transition-all duration-300" />
-      
+
       {/* 하트 버튼 - 위치 고정 */}
       <button
         type="button"
@@ -93,22 +93,15 @@ export default function APICard({
       {/* 상단 텍스트 정보 - 위치 고정 */}
       <div className="absolute top-9 left-[190px] right-8 flex flex-col items-start">
         {/* 제목 섹션 */}
-        <h3 className="w-full text-info-darker font-medium leading-none text-xl">
-          {name}
-        </h3>
-        
+        <h3 className="w-full text-info-darker font-medium leading-none text-xl">{name}</h3>
+
         {/* 상세 정보 섹션 */}
         <div className="absolute top-10">
           <p className="text-info-dark text-sm font-medium">Star {avgRating.toFixed(1)}</p>
-          <p className="text-info-dark text-sm font-medium">
-            {viewCounts.toLocaleString()} views
-          </p>
-          <p className="text-[#B0B0B0] text-xs mt-1">
-            {PRICING_LABEL[pricingType] ?? pricingType}
-          </p>
+          <p className="text-info-dark text-sm font-medium">{viewCounts.toLocaleString()} views</p>
+          <p className="text-[#B0B0B0] text-xs mt-1">{PRICING_LABEL[pricingType] ?? pricingType}</p>
         </div>
       </div>
-      
 
       {/* 설명 영역 - 위치 고정 */}
       <div className="absolute top-[155px] left-8 right-8">
