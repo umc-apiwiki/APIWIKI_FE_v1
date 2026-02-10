@@ -24,15 +24,15 @@ async function generateIcons() {
     // 각 크기별로 PNG 생성
     for (const size of sizes) {
       const outputPath = path.join(outputDir, `icon-${size}x${size}.png`)
-      
+
       await sharp(inputSvg)
         .resize(size, size, {
           fit: 'contain',
-          background: { r: 255, g: 255, b: 255, alpha: 0 }
+          background: { r: 255, g: 255, b: 255, alpha: 0 },
         })
         .png()
         .toFile(outputPath)
-      
+
       console.log(`✅ ${size}x${size} 아이콘 생성 완료`)
     }
 
