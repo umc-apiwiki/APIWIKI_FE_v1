@@ -11,11 +11,20 @@ interface ReviewProps {
   text: string
   date: string
   isMine?: boolean // 본인 리뷰 여부 확인용
+  onDeleteSuccess?: () => void // 삭제 후 콜백
 }
 
 const MAX_SCORE = 5
 
-export default function Review({ reviewId, name, score, text, date, isMine }: ReviewProps) {
+export default function Review({
+  reviewId,
+  name,
+  score,
+  text,
+  date,
+  isMine,
+  onDeleteSuccess,
+}: ReviewProps) {
   const { apiId } = useParams<{ apiId: string }>()
   const { removeReview, isLoading } = useDeleteReview()
 
@@ -25,7 +34,8 @@ export default function Review({ reviewId, name, score, text, date, isMine }: Re
     if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
       removeReview(Number(apiId), reviewId, () => {
         alert('리뷰가 삭제되었습니다.')
-        // 삭제 후 목록 갱신 로직 필요 (예: window.location.reload() 또는 상태 업데이트)
+        /* 삭제 후 목록 갱신 */
+        onDeleteSuccess?.()
       })
     }
   }

@@ -252,14 +252,23 @@ export interface ReviewItem {
 }
 
 /**
+ * 리뷰 목록 조회 결과 (평균 평점 + 페이지네이션)
+ */
+export interface ReviewList {
+  totalRating: number
+  reviewCount: number
+  reviews: PageResponse<ReviewItem>
+}
+
+/**
  * 리뷰 작성 응답 타입
  */
 export type PostReviewResponse = ApiResponse<PostReviewResult>
 
 /**
- * 리뷰 목록 조회 응답 타입 (페이지네이션 적용 시)
+ * 리뷰 목록 조회 응답 타입
  */
-export type ReviewListResponse = ApiResponse<PageResponse<ReviewItem>>
+export type ReviewListResponse = ApiResponse<ReviewList>
 
 // ===== Review Delete Types  =====
 

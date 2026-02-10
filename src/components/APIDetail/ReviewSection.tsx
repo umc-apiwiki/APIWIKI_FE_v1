@@ -1,29 +1,18 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { usePostReview } from '@/hooks/usePostReview'
+import { useReviews, usePostReview, useMyProfile } from '@/hooks'
 import Review from './Review'
 import StarFilled from '@/assets/icons/common/ic_star_filled.svg'
 import StarEmpty from '@/assets/icons/common/ic_star_empty.svg'
-
-interface RatingData {
-  score: number
-  count: number
-}
-
-interface RatingSummary {
-  averageScore: number
-  totalCount: number
-  ratings: RatingData[]
-}
 
 const MAX_SCORE = 5
 
 function PartialStar({ ratio }: { ratio: number }) {
   return (
     <div className="relative w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6">
-      <img src={StarEmpty} className="absolute inset-0 w-full h-full" />
+      <img src={StarEmpty} className="absolute inset-0 w-full h-full" alt="별" />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${ratio * 100}%` }}>
-        <img src={StarFilled} className="w-full h-full max-w-none" />
+        <img src={StarFilled} className="w-full h-full max-w-none" alt="별" />
       </div>
     </div>
   )
@@ -35,9 +24,23 @@ function StarRating({ score }: { score: number }) {
       {Array.from({ length: MAX_SCORE }).map((_, idx) => {
         const diff = score - idx
         if (diff >= 1)
-          return <img key={idx} src={StarFilled} className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6" />
+          return (
+            <img
+              key={idx}
+              src={StarFilled}
+              className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6"
+              alt="별"
+            />
+          )
         if (diff > 0) return <PartialStar key={idx} ratio={diff} />
-        return <img key={idx} src={StarEmpty} className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6" />
+        return (
+          <img
+            key={idx}
+            src={StarEmpty}
+            className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6"
+            alt="별"
+          />
+        )
       })}
     </div>
   )
@@ -46,47 +49,31 @@ function StarRating({ score }: { score: number }) {
 export default function ReviewSection() {
   const { apiId } = useParams<{ apiId: string }>()
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
-  const { createReview, isLoading } = usePostReview()
+  const [showAllReviews, setShowAllReviews] = useState(false)
 
-  /* reviewId와 isMine 여부를 포함한 데이터 예시 */
-  const reviews = [
-    {
-      reviewId: 101,
-      name: '홍길동',
-      score: 5,
-      text: '너무조아요 밥도 맛잇고 우양ㅇ냘어ㅑㅇㄴ멀아ㅣㄴ멀아ㅣㄴ멀;ㅏ인;머라인ㅁ;ㅓ라인;머라ㅣ;엄나ㅣ렁니마;ㅓㄹ아ㅣㄴ멀아ㅣㄴㅁ;ㅓㄹ이ㅏㄴ머라ㅣㅇ넘리ㅏ어마ㅣ;ㅓㅇ리ㅏㅁ;ㅓㄹ이ㅏㄴ;ㅓㅁ라ㅣ;러;ㅣㄴㅁ아ㅓㄹ;ㅏㅣㅇㅇㄴㅁㄹㅇㄴㄻㄴㅁ',
-      date: '2026년 01월 30일',
-      isMine: true, // 본인 리뷰 테스트용
-    },
-    {
-      reviewId: 102,
-      name: '김철수',
-      score: 4,
-      text: '괜찮아요, 만족합니다.',
-      date: '2026년 01월 28일',
-      isMine: false,
-    },
-    {
-      reviewId: 103,
-      name: '이영희',
-      score: 3,
-      text: '보통이에요, 기대보다는 아쉬움.',
-      date: '2026년 01월 25일',
-      isMine: false,
-    },
-  ]
+  /* API 데이터 불러오기 */
+  const {
+    data: reviewData,
+    isLoading: reviewsLoading,
+    refresh,
+    goToPage,
+  } = useReviews(Number(apiId), 0)
 
-  const data: RatingSummary = {
-    averageScore: 4.7,
-    totalCount: 1022,
-    ratings: [
-      { score: 5, count: 800 },
-      { score: 4, count: 150 },
-      { score: 3, count: 40 },
-      { score: 2, count: 20 },
-      { score: 1, count: 12 },
-    ],
-  }
+  const { createReview, isLoading: postLoading } = usePostReview()
+  const { profile: profileData } = useMyProfile()
+
+  /* 평점 분포 계산 (useMemo로 변경) */
+  const ratingDistribution = useMemo(() => {
+    if (!reviewData?.reviews.content) return []
+
+    /* 평점별 개수 집계 */
+    return [5, 4, 3, 2, 1].map((score) => {
+      const count = reviewData.reviews.content.filter(
+        (review) => Math.floor(review.rating) === score
+      ).length
+      return { score, count }
+    })
+  }, [reviewData])
 
   const handleSubmit = () => {
     if (!newReview.comment.trim()) {
@@ -94,11 +81,23 @@ export default function ReviewSection() {
       return
     }
     if (!apiId) return
+
     createReview(Number(apiId), newReview, () => {
       alert('리뷰가 등록되었습니다.')
       setNewReview({ rating: 5, comment: '' })
+      /* 리뷰 목록 새로고침 */
+      refresh()
     })
   }
+
+  /* 데이터 기본값 설정 */
+  const totalRating = reviewData?.totalRating ?? 0
+  const reviewCount = reviewData?.reviewCount ?? 0
+  const reviewList = reviewData?.reviews.content ?? []
+  const currentUserNickname = profileData?.nickname || null
+
+  /* 표시할 리뷰 개수 제한 */
+  const displayedReviews = showAllReviews ? reviewList : reviewList.slice(0, 5)
 
   return (
     <div className="flex flex-col">
@@ -112,20 +111,20 @@ export default function ReviewSection() {
         <div className="flex gap-6 xs:gap-8 md:gap-12 items-start w-full flex-col md:flex-row">
           <div className="flex flex-row md:flex-col justify-start md:justify-center items-center md:h-full gap-4 md:gap-0 w-full md:w-auto">
             <span className="font-normal text-black text-3xl xs:text-4xl md:text-5xl lg:text-[64px] leading-tight">
-              {data.averageScore.toFixed(1)}
+              {totalRating.toFixed(1)}
             </span>
             <div className="mt-0 md:mt-1">
-              <StarRating score={data.averageScore} />
+              <StarRating score={totalRating} />
             </div>
             <div>
               <span className="font-medium text-[#a4a4a4] text-sm xs:text-base md:text-lg lg:text-[22px] leading-snug">
-                {data.totalCount.toLocaleString()}개
+                {reviewCount.toLocaleString()}개
               </span>
             </div>
           </div>
           <div className="flex-1 flex flex-col gap-1 xs:gap-1.5 md:gap-2 w-full">
-            {data.ratings.map((item) => {
-              const percentage = (item.count / data.totalCount) * 100
+            {ratingDistribution.map((item) => {
+              const percentage = reviewCount > 0 ? (item.count / reviewCount) * 100 : 0
               return (
                 <div key={item.score} className="flex items-center gap-2 xs:gap-3 md:gap-4">
                   <span className="text-sm xs:text-base md:text-lg lg:text-xl font-medium text-black min-w-[1rem]">
@@ -154,12 +153,13 @@ export default function ReviewSection() {
               <button
                 key={idx}
                 type="button"
-                disabled={isLoading}
+                disabled={postLoading}
                 onClick={() => setNewReview({ ...newReview, rating: idx + 1 })}
               >
                 <img
                   src={idx < newReview.rating ? StarFilled : StarEmpty}
-                  className={`w-5 h-5 xs:w-6 xs:h-6 md:w-7 md:h-7 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`w-5 h-5 xs:w-6 xs:h-6 md:w-7 md:h-7 ${postLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  alt="별점"
                 />
               </button>
             ))}
@@ -167,40 +167,69 @@ export default function ReviewSection() {
         </div>
         <textarea
           className="w-full h-24 xs:h-28 md:h-32 p-3 xs:p-4 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-500 resize-none text-sm xs:text-base disabled:bg-gray-50 transition-colors"
-          placeholder={isLoading ? '등록 중입니다...' : '이 API에 대한 솔직한 후기를 남겨주세요.'}
+          placeholder={postLoading ? '등록 중입니다...' : '이 API에 대한 솔직한 후기를 남겨주세요.'}
           value={newReview.comment}
-          disabled={isLoading}
+          disabled={postLoading}
           onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
         />
         <div className="flex justify-end gap-2 xs:gap-3 mt-3 xs:mt-4">
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isLoading}
+            disabled={postLoading}
             className="px-4 xs:px-5 md:px-6 py-1.5 xs:py-2 bg-brand-500 text-white font-bold rounded-lg hover:bg-brand-600 transition-colors shadow-md disabled:bg-gray-400 text-xs xs:text-sm md:text-base"
           >
-            {isLoading ? '등록 중...' : '리뷰 저장하기'}
+            {postLoading ? '등록 중...' : '리뷰 저장하기'}
           </button>
         </div>
       </div>
 
       <div className="flex flex-col gap-6 xs:gap-7 md:gap-8">
-        {reviews.map((review) => (
-          <Review
-            key={review.reviewId} // index 대신 고유 ID 사용
-            reviewId={review.reviewId}
-            name={review.name}
-            score={review.score}
-            text={review.text}
-            date={review.date}
-            isMine={review.isMine} // 본인 여부 전달
-          />
-        ))}
+        {reviewsLoading && !reviewData ? (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <p className="text-gray-500">리뷰를 불러오는 중...</p>
+          </div>
+        ) : reviewList.length > 0 ? (
+          displayedReviews.map((review) => (
+            <Review
+              key={review.reviewId}
+              reviewId={review.reviewId}
+              name={review.nickname}
+              score={Math.floor(review.rating)}
+              text={review.comment}
+              date={new Date(review.createdAt).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+              isMine={currentUserNickname === review.nickname}
+              onDeleteSuccess={refresh}
+            />
+          ))
+        ) : (
+          <div className="flex justify-center items-center min-h-[200px] text-gray-400">
+            <p>아직 등록된 리뷰가 없습니다. 첫 번째 리뷰를 작성해보세요!</p>
+          </div>
+        )}
       </div>
 
-      <div className="font-medium text-brand-500 text-sm xs:text-base md:text-lg lg:text-[22px] mt-6 xs:mt-8 md:mt-10 mb-6 xs:mb-8 md:mb-10 cursor-pointer">
-        리뷰 모두 보기
-      </div>
+      {reviewList.length > 5 && !showAllReviews && (
+        <button
+          onClick={() => setShowAllReviews(true)}
+          className="font-medium text-brand-500 text-sm xs:text-base md:text-lg lg:text-[22px] mt-6 xs:mt-8 md:mt-10 mb-6 xs:mb-8 md:mb-10 cursor-pointer hover:text-brand-600 transition-colors"
+        >
+          리뷰 모두 보기 ({reviewList.length}개)
+        </button>
+      )}
+
+      {showAllReviews && reviewList.length > 5 && (
+        <button
+          onClick={() => setShowAllReviews(false)}
+          className="font-medium text-gray-500 text-sm xs:text-base md:text-lg lg:text-[22px] mt-6 xs:mt-8 md:mt-10 mb-6 xs:mb-8 md:mb-10 cursor-pointer hover:text-gray-700 transition-colors"
+        >
+          리뷰 접기
+        </button>
+      )}
     </div>
   )
 }
