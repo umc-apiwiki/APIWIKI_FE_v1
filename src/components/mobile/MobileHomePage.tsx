@@ -89,10 +89,10 @@ export const MobileHomePage = () => {
           </div>
 
           {/* 프로그레스 인디케이터 */}
-          <div className="relative w-full h-1 mt-3 xs:mt-4 bg-[#D9D9D9] rounded-full overflow-hidden">
+          <div className="relative w-12 xs:w-16 sm:w-20 h-1 mt-3 xs:mt-4 bg-[#D9D9D9] rounded-full overflow-hidden mx-auto">
             <div
-              className="absolute top-0 w-2 xs:w-3 h-full bg-brand-500 rounded-full transition-all duration-200"
-              style={{ left: `calc((100% - 0.5rem) * ${scrollProgress / 100})` }}
+              className="absolute top-0 w-[50%] h-full bg-brand-500 rounded-full transition-all duration-200"
+              style={{ left: `${Math.min(scrollProgress / 2, 50)}%` }}
             />
           </div>
         </motion.div>
