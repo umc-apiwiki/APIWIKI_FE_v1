@@ -9,6 +9,7 @@ import { useMobileHome } from '../../hooks/useMobileHome'
 import { MobileBottomNavigation } from './MobileBottomNavigation'
 import { MobileSearchModal } from './MobileSearchModal'
 import { MobileHeader } from './MobileHeader'
+import BrandLogo from '@/assets/icons/common/ic_brand_logo.svg'
 
 export const MobileHomePage = () => {
   const { isSearchModalOpen, categories, scrollRef, scrollProgress, handleScroll, handleCategoryClick, setIsSearchModalOpen } = useMobileHome()
@@ -26,7 +27,7 @@ export const MobileHomePage = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <img src="/logo.svg" alt="API Wiki Logo" className="w-16 h-16 xs:w-18 xs:h-18 sm:w-20 sm:h-20" />
+          <img src={BrandLogo} alt="API Wiki Logo" className="w-16 h-16 xs:w-18 xs:h-18 sm:w-20 sm:h-20" />
         </motion.div>
 
         {/* 설명 텍스트 */}

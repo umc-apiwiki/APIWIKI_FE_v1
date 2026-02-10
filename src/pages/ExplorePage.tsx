@@ -18,6 +18,7 @@ import { MobileBottomNavigation } from '@/components/mobile/MobileBottomNavigati
 
 import Filter from '@/assets/icons/action/ic_filter.svg'
 import ArrowDown from '@/assets/icons/action/ic_arrow_down.svg'
+import SearchLine from '@/assets/icons/action/ic_search_line.svg'
 
 const SORT_OPTIONS: { label: string; value: SortOption }[] = [
   { label: '최신순', value: 'LATEST' },
@@ -243,7 +244,7 @@ const ExplorePageContent = () => {
             onClick={() => setIsSearchOpen(true)}
             className="w-full bg-gray-100 rounded-lg xs:rounded-xl px-3 xs:px-4 py-2 xs:py-2.5 sm:py-3 flex items-center gap-2 text-left text-gray-400 text-xs xs:text-sm sm:text-base"
           >
-            <img src="/mingcute_search-line.svg" alt="Search" width={20} height={20} />
+            <img src={SearchLine} alt="Search" width={20} height={20} />
             <span>궁금한 API를 검색해보세요</span>
           </button>
         </div>

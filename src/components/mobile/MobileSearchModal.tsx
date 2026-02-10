@@ -6,6 +6,9 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMobileSearch } from '../../hooks/useMobileSearch'
+import SearchLine from '@/assets/icons/action/ic_search_line.svg'
+import SearchHistory from '@/assets/icons/common/ic_search_history.svg'
+import Cancel from '@/assets/icons/common/ic_cancel.svg'
 
 type MobileSearchModalProps = {
   isOpen: boolean
@@ -55,7 +58,7 @@ export const MobileSearchModal = ({ isOpen, onClose, onSearch }: MobileSearchMod
                     className="flex-shrink-0 p-1 hover:bg-gray-200 rounded-lg transition-colors"
                     aria-label="검색"
                   >
-                    <img src="/mingcute_search-line.svg" alt="Search" width={20} height={20} />
+                    <img src={SearchLine} alt="Search" width={20} height={20} />
                   </button>
                 </div>
               </div>
@@ -80,7 +83,7 @@ export const MobileSearchModal = ({ isOpen, onClose, onSearch }: MobileSearchMod
                           >
                             <div className="flex-shrink-0">
                               <img
-                                src="/mingcute_search-line.svg"
+                                src={SearchLine}
                                 alt="Search"
                                 width={16}
                                 height={16}
@@ -121,7 +124,7 @@ export const MobileSearchModal = ({ isOpen, onClose, onSearch }: MobileSearchMod
                         >
                           <div className="flex items-center gap-2 xs:gap-3 flex-1 min-w-0">
                             <div className="flex-shrink-0">
-                              <img src="/mdi_recent.svg" alt="Recent" width={16} height={16} className="xs:w-5 xs:h-5" />
+                              <img src={SearchHistory} alt="Recent" width={16} height={16} className="xs:w-5 xs:h-5" />
                             </div>
                             <span className="text-gray-900 truncate text-xs xs:text-sm sm:text-base">{item}</span>
                           </div>
@@ -134,7 +137,7 @@ export const MobileSearchModal = ({ isOpen, onClose, onSearch }: MobileSearchMod
                             aria-label="삭제"
                           >
                             <img
-                              src="/search_save_remove.svg"
+                              src={Cancel}
                               alt="Remove"
                               width={14}
                               height={14}
