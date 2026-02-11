@@ -8,7 +8,6 @@ import Share from '@/assets/icons/action/ic_share.svg'
 import OverviewSection from '@/components/APIDetail/OverviewSection'
 import PricingSection from '@/components/APIDetail/PricingSection'
 import ReviewSection from '@/components/APIDetail/ReviewSection'
-import CodeExampleSection from '@/components/APIDetail/CodeExampleSection'
 import APICardSmall from '@/components/APICardSmall'
 import { MobileHeader } from '@/components/mobile/MobileHeader'
 import { MobileBottomNavigation } from '@/components/mobile/MobileBottomNavigation'
@@ -28,7 +27,6 @@ const MENUS = [
   { key: 'A', label: '개요' },
   { key: 'B', label: '비용정보' },
   { key: 'C', label: '후기' },
-  { key: 'D', label: '코드예제' },
 ] as const
 
 const PRICING_LABEL: Record<string, string> = {
@@ -40,7 +38,7 @@ const PRICING_LABEL: Record<string, string> = {
 export default function APIDetailPage() {
   const { id } = useParams()
   const apiId = Number(id) || 0
-  const [activeMenu, setActiveMenu] = useState<'A' | 'B' | 'C' | 'D'>('A')
+  const [activeMenu, setActiveMenu] = useState<'A' | 'B' | 'C'>('A')
   const { isMobile } = useDeviceDetect()
 
   const { data: finalDetail, isLoading: isDetailLoading, error, fetchApiDetail } = useApiDetail()
@@ -234,7 +232,6 @@ export default function APIDetailPage() {
               <PricingSection categories={finalDetail.categories} pricing={pricingData} />
             )}
             {activeMenu === 'C' && (isMobile ? <MobileReviewSection /> : <ReviewSection />)}
-            {activeMenu === 'D' && <CodeExampleSection />}
           </div>
         </div>
 
