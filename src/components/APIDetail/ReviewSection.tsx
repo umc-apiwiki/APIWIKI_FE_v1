@@ -11,7 +11,7 @@ import StarEmpty from '@/assets/icons/common/ic_star_empty.svg'
 
 const MAX_SCORE = 5
 
-// [추가] createReview 결과 처리를 위한 타입 정의
+// createReview 결과 처리를 위한 타입 정의
 interface CreateReviewResult {
   success?: boolean
   rating?: number
@@ -95,7 +95,7 @@ export default function ReviewSection() {
     }
     if (!apiId || apiId === 0) return
 
-    // [수정] any 대신 타입 단언(Type Assertion) 사용
+    // any 대신 타입 단언 사용
     const result = (await createReview(apiId, newReview)) as CreateReviewResult
 
     if (result && (result.success || result.rating)) {
@@ -125,8 +125,9 @@ export default function ReviewSection() {
       } else {
         alert(result.message)
       }
-    } catch (e) {
-      // e는 기본적으로 unknown이므로 별도 처리 없이 메시지만 출력
+    } catch (error) {
+      // [수정 포인트] 에러 변수(error)를 콘솔에 찍어서 '사용' 상태로 만듦 -> 린트 에러 해결!
+      console.error('리뷰 삭제 중 오류:', error)
       alert('오류가 발생했습니다.')
     }
   }
@@ -250,6 +251,7 @@ export default function ReviewSection() {
         )}
       </div>
 
+      {/* 페이지네이션 */}
       {totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
