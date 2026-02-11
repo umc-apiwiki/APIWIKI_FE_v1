@@ -24,6 +24,9 @@ export const MobileHomePage = () => {
 
   return (
     <div className="relative w-full min-h-screen max-w-full overflow-x-hidden bg-gradient-to-b from-blue-50 to-white pb-24">
+      {/* 배경 원 그라데이션 */}
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%-80px)] w-[200px] h-[200px] bg-brand-500/40 rounded-full blur-[150px] pointer-events-none" />
+      
       <MobileHeader />
 
       {/* 메인 컨텐츠 */}
@@ -65,7 +68,7 @@ export const MobileHomePage = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           onClick={() => setIsSearchModalOpen(true)}
         >
-          <div className="flex items-center justify-between px-4 xs:px-5 py-2.5 xs:py-3 bg-white rounded-[25px] xs:rounded-[30px] shadow-[1px_1px_5px_2px_var(--tw-shadow-color)] shadow-brand-500/25 border border-brand-500/25 hover:border-brand-500/50 transition-all">
+          <div className="flex items-center justify-between px-4 xs:px-5 py-2.5 xs:py-3 bg-white/95 backdrop-blur-sm rounded-[25px] xs:rounded-[30px] shadow-[1px_1px_5px_2px_var(--tw-shadow-color)] shadow-brand-500/25 border border-brand-500/25 hover:border-brand-500/50 transition-all">
             <span className="text-slate-400 text-xs xs:text-sm sm:text-base font-medium">
               궁금한 API를 검색해보세요
             </span>
