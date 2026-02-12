@@ -93,7 +93,10 @@ const Header = () => {
             이렇게 하면 로고 클릭 시 브라우저가 주소를 새로 로딩(Refresh)하므로,
             HomePage의 showMore 상태가 false(초기화면)로 리셋됩니다.
           */}
-          <a href="/" className="flex items-center pt-2 gap-[7px] pl-4 sm:pl-8 md:pl-12 lg:pl-20 xl:pl-32">
+          <a
+            href="/"
+            className="flex items-center pt-2 gap-[7px] pl-4 sm:pl-8 md:pl-12 lg:pl-20 xl:pl-32"
+          >
             <img src={HomeLogo} alt="Home Logo Icon" />
             <span className="font-mono antialiased text-[27px] font-medium tracking-[-3px] text-brand-500">
               API Wiki
