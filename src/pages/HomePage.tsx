@@ -15,6 +15,7 @@ interface NewsData {
   title: string
   publisher: string
   thumb: string
+  url: string
 }
 
 const newsItems: NewsData[] = [
@@ -22,26 +23,31 @@ const newsItems: NewsData[] = [
     title: '"쿠팡 중국인 피의자, 20년 경력개발자 위 개발자"',
     publisher: '/images/더중앙.svg',
     thumb: '/images/쿠팡 중국인.svg',
+    url: 'https://www.joongang.co.kr/article/25389999',
   },
   {
     title: 'AI가 코드 짜는 시대, ‘개발자’의 역할과 이름을 다시 ...',
     publisher: '/images/잇월드.svg',
     thumb: '/images/AI.svg',
+    url: 'https://www.itworld.co.kr/article/4108350/ai%EA%B0%80-%EC%BD%94%EB%93%9C-%EC%A7%9C%EB%8A%94-%EC%8B%9C%EB%8C%80-%EA%B0%9C%EB%B0%9C%EC%9E%90%EC%9D%98-%EC%97%AD%ED%95%A0%EA%B3%BC-%EC%9D%B4%EB%A6%84%EC%9D%84-%EB%8B%A4%EC%8B%9C.html',
   },
   {
     title: '"대기업 꿈꾸다 이젠 해외로"…영어학원의 IT개발자들',
     publisher: '/images/노컷뉴스.svg',
     thumb: '/images/대기업.svg',
+    url: 'https://www.nocutnews.co.kr/news/6445259',
   },
   {
     title: 'NIA-경기도경제과학진흥원, AI 윤리 문화 업무협약',
     publisher: '/images/경북신문.svg',
     thumb: '/images/NIA.svg',
+    url: 'https://www.kbsm.net/news/view.php?idx=501103',
   },
   {
     title: "업스테이지, 日 AI시장 '온프레미스'와 'API'로 공략",
     publisher: '/images/더일렉.svg',
     thumb: '/images/업스테이지.svg',
+    url: 'https://www.thelec.kr/news/articleView.html?idxno=45364',
   },
 ]
 
@@ -226,6 +232,7 @@ const ScrollableSection = ({
                 title={news.title}
                 publisherLogoUrl={news.publisher}
                 thumbnailUrl={news.thumb}
+                url={news.url}
               />
             ))}
       </div>
