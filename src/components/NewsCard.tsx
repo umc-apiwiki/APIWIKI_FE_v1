@@ -3,10 +3,16 @@ interface NewsCardProps {
   publisherLogoUrl: string
   thumbnailUrl: string
   url?: string
+  preventClick?: boolean
 }
 
-export default function NewsCard({ title, publisherLogoUrl, thumbnailUrl, url }: NewsCardProps) {
-  const handleClick = () => {
+export default function NewsCard({ title, publisherLogoUrl, thumbnailUrl, url, preventClick = false }: NewsCardProps) {
+  const handleClick = (e: React.MouseEvent) => {
+    if (preventClick) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer')
     }

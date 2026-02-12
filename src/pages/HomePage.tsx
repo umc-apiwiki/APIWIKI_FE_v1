@@ -227,13 +227,24 @@ const ScrollableSection = ({
               </div>
             ))
           : (data as NewsData[]).map((news, i) => (
-              <NewsCard
+              <div
                 key={`news-${title}-${i}`}
-                title={news.title}
-                publisherLogoUrl={news.publisher}
-                thumbnailUrl={news.thumb}
-                url={news.url}
-              />
+                className="flex-shrink-0"
+                onClick={(e) => {
+                  if (hasDraggedRef.current) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }
+                }}
+              >
+                <NewsCard
+                  title={news.title}
+                  publisherLogoUrl={news.publisher}
+                  thumbnailUrl={news.thumb}
+                  url={news.url}
+                  preventClick={hasDragged}
+                />
+              </div>
             ))}
       </div>
 
