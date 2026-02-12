@@ -58,16 +58,18 @@ const ScrollableSection = ({
   const scrollRef = useRef<HTMLDivElement>(null)
   const [indicatorX, setIndicatorX] = useState(0)
 
-  // 드래그 상태 관리 (Lint 에러 해결을 위해 State로 관리)
+  // 드래그 상태 관리
   const [isDragActive, setIsDragActive] = useState(false)
   const [activeTarget, setActiveTarget] = useState<'handle' | 'content' | null>(null)
-  const [hasDragged, setHasDragged] = useState(false) // 실제로 드래그가 발생했는지 추적 (state로 변경)
+  const [hasDragged, setHasDragged] = useState(false) // 렌더링용
 
   const isDragging = useRef(false)
   const dragTarget = useRef<'handle' | 'content' | null>(null)
   const startX = useRef(0)
   const startScrollLeft = useRef(0)
   const startIndicatorX = useRef(0)
+  const hasDraggedRef = useRef(false) // 이벤트 핸들러에서 즉시 사용할 ref
+  const clickTimeoutRef = useRef<number | null>(null)
 
   const MAX_MOVE = 24
   const DRAG_THRESHOLD = 5 // 드래그로 인식하기 위한 최소 이동 거리 (px)
@@ -81,6 +83,10 @@ const ScrollableSection = ({
     }
     return () => {
       document.body.style.userSelect = ''
+      // 컴포넌트 언마운트 시 타임아웃 정리
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current)
+      }
     }
   }, [isDragActive])
 
@@ -93,7 +99,15 @@ const ScrollableSection = ({
 
   const onDragStart = (e: React.MouseEvent, target: 'handle' | 'content') => {
     isDragging.current = true
-    setHasDragged(false) // 드래그 시작 시 초기화
+    hasDraggedRef.current = false // ref 초기화
+    setHasDragged(false) // state 초기화
+    
+    // 기존 타임아웃 취소
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current)
+      clickTimeoutRef.current = null
+    }
+    
     setIsDragActive(true)
     setActiveTarget(target)
     dragTarget.current = target
@@ -112,7 +126,8 @@ const ScrollableSection = ({
 
     // 드래그 threshold 체크: 일정 거리 이상 움직였을 때만 드래그로 인식
     if (Math.abs(deltaX) > DRAG_THRESHOLD) {
-      setHasDragged(true)
+      hasDraggedRef.current = true // ref 즉시 업데이트
+      setHasDragged(true) // state도 업데이트
     }
 
     // 실제 드래그가 발생했을 때만 스크롤 이동
@@ -130,7 +145,7 @@ const ScrollableSection = ({
   }
 
   const onDragEnd = () => {
-    const wasDragging = hasDragged
+    const wasDragging = hasDraggedRef.current
     
     isDragging.current = false
     setIsDragActive(false)
@@ -144,10 +159,14 @@ const ScrollableSection = ({
 
     // 드래그가 발생했다면 클릭 이벤트가 완전히 처리될 때까지 충분한 시간 대기
     if (wasDragging) {
-      setTimeout(() => {
+      // ref는 즐시 초기화하지 않고 조금 더 유지
+      clickTimeoutRef.current = setTimeout(() => {
+        hasDraggedRef.current = false
         setHasDragged(false)
-      }, 100)
+        clickTimeoutRef.current = null
+      }, 200) // 100ms에서 200ms로 증가
     } else {
+      hasDraggedRef.current = false
       setHasDragged(false)
     }
   }
@@ -172,8 +191,8 @@ const ScrollableSection = ({
         ref={scrollRef}
         onMouseDown={(e) => onDragStart(e, 'content')}
         onClick={(e) => {
-          // 드래그가 발생했으면 클릭 이벤트 막기
-          if (hasDragged) {
+          // ref를 사용하여 즉시 체크
+          if (hasDraggedRef.current) {
             e.preventDefault()
             e.stopPropagation()
           }
@@ -191,8 +210,8 @@ const ScrollableSection = ({
                 key={`api-${title}-${api.apiId}-${index}`}
                 className="flex-shrink-0 w-[280px] sm:w-[300px]"
                 onClick={(e) => {
-                  // 드래그가 발생했으면 하위 클릭 이벤트도 막기
-                  if (hasDragged) {
+                  // ref를 사용하여 즉시 체크
+                  if (hasDraggedRef.current) {
                     e.preventDefault()
                     e.stopPropagation()
                   }
