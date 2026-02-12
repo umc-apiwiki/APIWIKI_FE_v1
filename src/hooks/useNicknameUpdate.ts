@@ -87,36 +87,12 @@ export const useNicknameUpdate = (
     setIsCheckingNickname(true)
     setNicknameError(undefined)
 
-    console.group('🔍 [useNicknameUpdate] 닉네임 중복 확인')
-    console.log('📝 확인할 닉네임:', trimmedNickname)
-    console.log('⏰ 시각:', new Date().toISOString())
-    console.groupEnd()
-
     try {
       await checkNicknameDuplicate(trimmedNickname)
-      
-      console.group('✅ [useNicknameUpdate] 닉네임 중복 확인 성공')
-      console.log('✔️ 사용 가능한 닉네임:', trimmedNickname)
-      console.log('⏰ 시각:', new Date().toISOString())
-      console.groupEnd()
       
       setIsNicknameChecked(true)
       alert('사용 가능한 닉네임입니다.')
     } catch (error: unknown) {
-      console.group('❌ [useNicknameUpdate] 닉네임 중복 확인 실패')
-      console.error('💥 에러 객체:', error)
-      
-      if (isAxiosError(error)) {
-        console.log('📊 HTTP Status:', error.response?.status)
-        console.log('📋 응답 데이터:', error.response?.data)
-        console.log('🔑 에러 코드:', error.response?.data?.code)
-        console.log('📝 에러 메시지:', error.response?.data?.message)
-        console.log('🌐 요청 URL:', error.config?.url)
-        console.log('📤 요청 파라미터:', error.config?.params)
-      }
-      console.log('⏰ 시각:', new Date().toISOString())
-      console.groupEnd()
-      
       const errorCode = isAxiosError(error) ? error.response?.data?.code : undefined
       const errorMessage = isAxiosError(error) ? error.response?.data?.message : undefined
 
@@ -159,20 +135,8 @@ export const useNicknameUpdate = (
       passwordConfirm: currentPassword.trim() 
     }
 
-    console.group('🔵 [useNicknameUpdate] 닉네임 변경 요청')
-    console.log('📤 요청 데이터:', requestData)
-    console.log('📝 새 닉네임:', requestData.nickname)
-    console.log('🔐 현재 비밀번호로 인증')
-    console.log('⏰ 시각:', new Date().toISOString())
-    console.groupEnd()
-
     try {
-      const response = await updateProfile(requestData)
-      
-      console.group('✅ [useNicknameUpdate] 닉네임 변경 성공')
-      console.log('📥 응답 데이터:', response)
-      console.log('⏰ 시각:', new Date().toISOString())
-      console.groupEnd()
+      await updateProfile(requestData)
 
       alert('닉네임이 성공적으로 변경되었습니다.')
       resetForm()
@@ -181,21 +145,6 @@ export const useNicknameUpdate = (
         onSuccess()
       }
     } catch (error: unknown) {
-      console.group('❌ [useNicknameUpdate] 닉네임 변경 실패')
-      console.error('💥 에러 객체:', error)
-      
-      if (isAxiosError(error)) {
-        console.log('📊 HTTP Status:', error.response?.status)
-        console.log('📋 응답 데이터:', error.response?.data)
-        console.log('🔑 에러 코드:', error.response?.data?.code)
-        console.log('📝 에러 메시지:', error.response?.data?.message)
-        console.log('🌐 요청 URL:', error.config?.url)
-        console.log('📤 요청 메서드:', error.config?.method)
-        console.log('📦 요청 데이터:', error.config?.data)
-      }
-      console.log('⏰ 시각:', new Date().toISOString())
-      console.groupEnd()
-      
       const errorCode = isAxiosError(error) ? error.response?.data?.code : undefined
       const errorMessage = isAxiosError(error) ? error.response?.data?.message : undefined
       

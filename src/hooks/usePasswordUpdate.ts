@@ -103,23 +103,8 @@ export const usePasswordUpdate = (
       passwordConfirm: passwordConfirm.trim(),
     }
 
-    console.group('🔵 [usePasswordUpdate] 비밀번호 변경 요청')
-    console.log('📤 요청 데이터:', {
-      nickname: requestData.nickname,
-      password: '***' + password.slice(-2), // 보안: 마지막 2자만 표시
-      passwordConfirm: '***' + passwordConfirm.slice(-2),
-      passwordLength: password.length,
-    })
-    console.log('⏰ 시각:', new Date().toISOString())
-    console.groupEnd()
-
     try {
-      const response = await updateProfile(requestData)
-      
-      console.group('✅ [usePasswordUpdate] 비밀번호 변경 성공')
-      console.log('📥 응답 데이터:', response)
-      console.log('⏰ 시각:', new Date().toISOString())
-      console.groupEnd()
+      await updateProfile(requestData)
 
       alert('비밀번호가 성공적으로 변경되었습니다.')
       resetForm()
@@ -128,22 +113,6 @@ export const usePasswordUpdate = (
         onSuccess()
       }
     } catch (error: unknown) {
-      console.group('❌ [usePasswordUpdate] 비밀번호 변경 실패')
-      console.error('💥 에러 객체:', error)
-      
-      if (isAxiosError(error)) {
-        console.log('📊 HTTP Status:', error.response?.status)
-        console.log('📋 응답 데이터:', error.response?.data)
-        console.log('🔑 에러 코드:', error.response?.data?.code)
-        console.log('📝 에러 메시지:', error.response?.data?.message)
-        console.log('🌐 요청 URL:', error.config?.url)
-        console.log('📤 요청 메서드:', error.config?.method?.toUpperCase())
-        console.log('📦 요청 헤더:', error.config?.headers)
-        console.log('🔐 Authorization 헤더 존재:', !!error.config?.headers?.Authorization)
-      }
-      console.log('⏰ 시각:', new Date().toISOString())
-      console.groupEnd()
-      
       const errorCode = isAxiosError(error) ? error.response?.data?.code : undefined
       const errorMessage = isAxiosError(error) ? error.response?.data?.message : undefined
       

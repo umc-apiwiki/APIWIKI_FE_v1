@@ -33,18 +33,10 @@ export const getMyWikiHistory = async (params: WikiHistoryParams): Promise<MyWik
 export const updateProfile = async (
   profileData: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
-  console.log('🔧 [Service] updateProfile 호출', {
-    nickname: profileData.nickname || '(비어있음)',
-    hasPassword: !!profileData.password,
-    passwordLength: profileData.password?.length || 0,
-  })
-  
   const { data } = await axiosInstance.patch<UpdateProfileResponse>(
     '/api/v1/profile',
     profileData
   )
-  
-  console.log('✅ [Service] updateProfile 응답', data)
   return data
 }
 
@@ -55,16 +47,12 @@ export const updateProfile = async (
 export const checkNicknameDuplicate = async (
   nickname: string
 ): Promise<CheckNicknameDuplicateResponse> => {
-  console.log('🔧 [Service] checkNicknameDuplicate 호출', { nickname })
-  
   const { data } = await axiosInstance.get<CheckNicknameDuplicateResponse>(
     '/api/v1/profile/nickname/check',
     {
       params: { nickname },
     }
   )
-  
-  console.log('✅ [Service] checkNicknameDuplicate 응답', data)
   return data
 }
 
