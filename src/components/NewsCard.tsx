@@ -2,11 +2,30 @@ interface NewsCardProps {
   title: string
   publisherLogoUrl: string
   thumbnailUrl: string
+  url?: string
+  preventClick?: boolean
 }
 
-export default function NewsCard({ title, publisherLogoUrl, thumbnailUrl }: NewsCardProps) {
+export default function NewsCard({
+  title,
+  publisherLogoUrl,
+  thumbnailUrl,
+  url,
+  preventClick = false,
+}: NewsCardProps) {
+  const handleClick = (e: React.MouseEvent) => {
+    if (preventClick) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   return (
-    <div className="group relative w-80 h-60 flex-shrink-0 cursor-pointer">
+    <div className="group relative w-80 h-60 flex-shrink-0 cursor-pointer" onClick={handleClick}>
       {/* 수정됨: border-[0.25px] border-sky-500 삭제 */}
       <div
         className="w-full h-full bg-white rounded-2xl shadow-[1px_5px_10px_0px_rgba(33,150,243,0.25)] 
