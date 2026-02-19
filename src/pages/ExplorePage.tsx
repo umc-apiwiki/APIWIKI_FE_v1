@@ -88,13 +88,11 @@ const ExplorePageContent = () => {
 
     isResetRef.current = true
 
-    /* eslint-disable react-hooks/set-state-in-effect */
     setParams((prev) => ({
       ...prev,
       q: urlQuery,
       page: 0,
     }))
-    /* eslint-enable react-hooks/set-state-in-effect */
 
     if (!urlQuery) {
       setFilterState({})
@@ -114,7 +112,6 @@ const ExplorePageContent = () => {
       isReset: isResetRef.current,
     })
 
-    /* eslint-disable react-hooks/set-state-in-effect */
     if (isResetRef.current) {
       // 검색/필터/정렬 변경 시에는 목록을 아예 교체
       setItems(pageData.content)
@@ -143,7 +140,6 @@ const ExplorePageContent = () => {
     hasMoreRef.current = !pageData.last // ref도 동기화
     setTotalElements(pageData.totalElements)
     console.log('✅ hasMore 설정:', !pageData.last)
-    /* eslint-enable react-hooks/set-state-in-effect */
     isResetRef.current = false
   }, [pageData])
 
@@ -189,6 +185,7 @@ const ExplorePageContent = () => {
 
     observer.observe(sentinel)
     return () => observer.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, error, items.length])
 
   // Sort 드롭다운 외부 클릭 닫기
