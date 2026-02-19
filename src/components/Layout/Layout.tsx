@@ -8,7 +8,7 @@ const Layout = () => {
       <main>
         {/* 배경 원 */}
         <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%-80px)] w-[300px] h-[300px] bg-brand-500/50 rounded-full blur-[200px] pointer-events-none" />
-        <div className="relative z-0">
+        <div className="relative z-0 md:pt-20">
           <Outlet />
         </div>
       </main>
