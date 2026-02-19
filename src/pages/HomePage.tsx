@@ -196,11 +196,12 @@ const ScrollableSection = ({
       <div
         ref={scrollRef}
         onMouseDown={(e) => onDragStart(e, 'content')}
-        onClick={(e) => {
-          // ref를 사용하여 즉시 체크
+        onClickCapture={(e) => {
+          // 캐플처 단계에서 차단 (자식 요소보다 먼저 실행)
           if (hasDraggedRef.current) {
             e.preventDefault()
             e.stopPropagation()
+            return false
           }
         }}
         // 이미지 드래그 방지 (중요)
@@ -215,15 +216,16 @@ const ScrollableSection = ({
               <div
                 key={`api-${title}-${api.apiId}-${index}`}
                 className="flex-shrink-0 w-[280px] sm:w-[300px]"
-                onClick={(e) => {
-                  // ref를 사용하여 즉시 체크
+                onClickCapture={(e) => {
+                  // 캐플처 단계에서 자식보다 먼저 차단
                   if (hasDraggedRef.current) {
                     e.preventDefault()
                     e.stopPropagation()
+                    return false
                   }
                 }}
               >
-                <APICardSmall {...api} preventClick={hasDragged} />
+                <APICardSmall {...api} />
               </div>
             ))
           : (data as NewsData[]).map((news, i) => (

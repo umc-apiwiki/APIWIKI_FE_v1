@@ -72,6 +72,7 @@ const ExplorePageContent = () => {
   const [items, setItems] = useState<ApiPreview[]>([])
   // 마지막 페이지 도달 여부
   const [hasMore, setHasMore] = useState(true)
+  const hasMoreRef = useRef(true) // 클로저 문제 해결용
   // 총 개수 (필터/검색 결과 표시용)
   const [totalElements, setTotalElements] = useState<number | null>(null)
   // 리셋 구분 (검색/필터/정렬 변경 시 true → 교체, 스크롤 시 false → 추가)
@@ -87,13 +88,11 @@ const ExplorePageContent = () => {
 
     isResetRef.current = true
 
-    /* eslint-disable react-hooks/set-state-in-effect */
     setParams((prev) => ({
       ...prev,
       q: urlQuery,
       page: 0,
     }))
-    /* eslint-enable react-hooks/set-state-in-effect */
 
     if (!urlQuery) {
       setFilterState({})
@@ -104,10 +103,19 @@ const ExplorePageContent = () => {
   useEffect(() => {
     if (!pageData?.content) return
 
-    /* eslint-disable react-hooks/set-state-in-effect */
+    console.log('📦 [API 응답]', {
+      받은데이터: pageData.content.length,
+      현재페이지: pageData.currentPage,
+      전체페이지: pageData.totalPage,
+      마지막페이지: pageData.last,
+      전체항목수: pageData.totalElements,
+      isReset: isResetRef.current,
+    })
+
     if (isResetRef.current) {
       // 검색/필터/정렬 변경 시에는 목록을 아예 교체
       setItems(pageData.content)
+      console.log('🔄 목록 교체:', pageData.content.length)
     } else {
       // 무한 스크롤 시에는 기존 목록에 추가 (단, 중복된 ID는 제거)
       setItems((prev) => {
@@ -117,13 +125,21 @@ const ExplorePageContent = () => {
         // 2. 새로 들어온 데이터 중, 기존에 없는 것만 필터링
         const newItems = pageData.content.filter((item) => !existingIds.has(item.apiId))
 
+        console.log('➕ 목록 추가:', {
+          기존: prev.length,
+          새로받음: pageData.content.length,
+          실제추가: newItems.length,
+          최종: prev.length + newItems.length,
+        })
+
         // 3. 기존 목록 뒤에 새로운 아이템만 붙임
         return [...prev, ...newItems]
       })
     }
     setHasMore(!pageData.last)
+    hasMoreRef.current = !pageData.last // ref도 동기화
     setTotalElements(pageData.totalElements)
-    /* eslint-enable react-hooks/set-state-in-effect */
+    console.log('✅ hasMore 설정:', !pageData.last)
     isResetRef.current = false
   }, [pageData])
 
@@ -133,9 +149,11 @@ const ExplorePageContent = () => {
 
     // 이전 호출과 동일한 params인 경우 스킵
     if (prevParamsRef.current === currentParamsKey) {
+      console.log('⏭️ 중복 params 스킵')
       return
     }
 
+    console.log('🚀 API 요청:', params)
     prevParamsRef.current = currentParamsKey
     fetchApiList(params)
   }, [params, fetchApiList])
@@ -143,11 +161,22 @@ const ExplorePageContent = () => {
   // 무한 스크롤 IntersectionObserver
   useEffect(() => {
     const sentinel = sentinelRef.current
-    if (!sentinel) return
+    if (!sentinel) {
+      console.log('⚠️ sentinel 없음')
+      return
+    }
+
+    console.log('👀 IntersectionObserver 설정:', {
+      items: items.length,
+      hasMore,
+      isLoading,
+      error,
+    })
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoading && !error && hasMore) {
+        const currentHasMore = hasMoreRef.current
+        if (entries[0].isIntersecting && !isLoading && !error && currentHasMore) {
           setParams((prev) => ({ ...prev, page: (prev.page ?? 0) + 1 }))
         }
       },
@@ -156,7 +185,8 @@ const ExplorePageContent = () => {
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [isLoading, error, hasMore])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, error, items.length])
 
   // Sort 드롭다운 외부 클릭 닫기
   useEffect(() => {
@@ -172,7 +202,15 @@ const ExplorePageContent = () => {
   // 검색 (URL만 변경하여 useEffect가 처리하게 유도)
   const handleSearch = useCallback(
     (q: string) => {
-      setSearchParams(q ? { q } : {})
+      isResetRef.current = true
+      setItems([])
+      setHasMore(true)
+      hasMoreRef.current = true
+      setTotalElements(null)
+      setParams((prev) => ({ ...prev, q, page: 0 }))
+
+      // URL 쿼리 파라미터 업데이트
+      setSearchParams({ q })
     },
     [setSearchParams]
   )
@@ -182,6 +220,7 @@ const ExplorePageContent = () => {
     isResetRef.current = true
     setItems([])
     setHasMore(true)
+    hasMoreRef.current = true
     setTotalElements(null)
     setFilterState(filters)
     setParams((prev) => ({
@@ -198,6 +237,7 @@ const ExplorePageContent = () => {
     isResetRef.current = true
     setItems([])
     setHasMore(true)
+    hasMoreRef.current = true
     setTotalElements(null)
     setParams((prev) => ({ ...prev, sort, page: 0 }))
     setIsSortOpen(false)
