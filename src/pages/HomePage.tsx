@@ -331,7 +331,7 @@ const HomePage = () => {
 
   return (
     <div className="w-full flex flex-col items-center justify-center min-h-screen">
-      <div className="w-full flex flex-col items-center pt-24 pb-24 animate-slide-up">
+      <div className="w-full flex flex-col items-center pt-4 pb-24 animate-slide-up">
         {/* 홈으로 돌아가기 버튼 */}
         <div className="w-full flex justify-center mb-8">
           <BottomButtonSection onClick={toggleView} isExpanded={true} />
