@@ -79,6 +79,30 @@ const ExplorePageContent = () => {
   // 이전 API 호출 params 저장 (중복 호출 방지용)
   const prevParamsRef = useRef<string>('')
 
+  // URL 파라미터(q) 변화에 따른 상태 동기화 및 초기화 (헤더 클릭 시 초기화 해결)
+  useEffect(() => {
+    const urlQuery = searchParams.get('q') || undefined
+
+    // URL의 q와 현재 메모리 상의 q가 다를 때만 동기화 로직 실행
+    if (params.q !== urlQuery) {
+      isResetRef.current = true
+      setItems([])
+      setHasMore(true)
+      setTotalElements(null)
+      
+      setParams((prev) => ({
+        ...prev,
+        q: urlQuery,
+        page: 0,
+      }))
+
+      // 검색어가 없는 경로(/explore)로 이동한 경우 필터 UI 상태도 초기화
+      if (!urlQuery) {
+        setFilterState({})
+      }
+    }
+  }, [searchParams])
+
   // ✅ [수정됨] pageData 수신 시 items 업데이트 (중복 제거 로직 추가)
   useEffect(() => {
     if (!pageData?.content) return
@@ -126,7 +150,7 @@ const ExplorePageContent = () => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoading && !error) {
+        if (entries[0].isIntersecting && !isLoading && !error && hasMore) {
           setParams((prev) => ({ ...prev, page: (prev.page ?? 0) + 1 }))
         }
       },
@@ -135,7 +159,7 @@ const ExplorePageContent = () => {
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [isLoading, error, items.length, hasMore])
+  }, [isLoading, error, hasMore])
 
   // Sort 드롭다운 외부 클릭 닫기
   useEffect(() => {
@@ -148,17 +172,10 @@ const ExplorePageContent = () => {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  // 검색
+  // 검색 (URL만 변경하여 useEffect가 처리하게 유도)
   const handleSearch = useCallback(
     (q: string) => {
-      isResetRef.current = true
-      setItems([])
-      setHasMore(true)
-      setTotalElements(null)
-      setParams((prev) => ({ ...prev, q, page: 0 }))
-
-      // URL 쿼리 파라미터 업데이트
-      setSearchParams({ q })
+      setSearchParams(q ? { q } : {})
     },
     [setSearchParams]
   )
