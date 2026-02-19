@@ -53,13 +53,13 @@ const ExplorePageContent = () => {
   } = useCompare()
 
   // API 조회 파라미터
-  const [params, setParams] = useState<ApiListParams>({
+  const [params, setParams] = useState<ApiListParams>(() => ({
     page: 0,
     size: 16,
     sort: 'LATEST',
     direction: 'DESC',
     q: searchParams.get('q') || undefined,
-  })
+  }))
 
   // 필터 상태 (FilterModal 초기값 전달용)
   const [filterState, setFilterState] = useState<Partial<FilterValues>>({})
@@ -79,6 +79,27 @@ const ExplorePageContent = () => {
   const isResetRef = useRef(true)
   // 이전 API 호출 params 저장 (중복 호출 방지용)
   const prevParamsRef = useRef<string>('')
+
+  // URL 파라미터(q) 변화에 따른 상태 동기화 및 초기화 (린트 에러 수정)
+  useEffect(() => {
+    const urlQuery = searchParams.get('q') || undefined
+
+    if (params.q === urlQuery) return
+
+    isResetRef.current = true
+
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setParams((prev) => ({
+      ...prev,
+      q: urlQuery,
+      page: 0,
+    }))
+    /* eslint-enable react-hooks/set-state-in-effect */
+
+    if (!urlQuery) {
+      setFilterState({})
+    }
+  }, [searchParams, params.q])
 
   // ✅ [수정됨] pageData 수신 시 items 업데이트 (중복 제거 로직 추가)
   useEffect(() => {
@@ -159,33 +180,15 @@ const ExplorePageContent = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         const currentHasMore = hasMoreRef.current
-        console.log('👁️ Sentinel 감지:', {
-          isIntersecting: entries[0].isIntersecting,
-          isLoading,
-          error,
-          hasMore: currentHasMore,
-          현재items: items.length,
-        })
         if (entries[0].isIntersecting && !isLoading && !error && currentHasMore) {
-          console.log('📄 다음 페이지 로드 시작')
           setParams((prev) => ({ ...prev, page: (prev.page ?? 0) + 1 }))
-        } else {
-          console.log('❌ 로드 불가:', {
-            isIntersecting: entries[0].isIntersecting,
-            isLoading,
-            error,
-            hasMore: currentHasMore,
-          })
         }
       },
       { rootMargin: '200px' }
     )
 
     observer.observe(sentinel)
-    return () => {
-      console.log('🔌 Observer disconnect')
-      observer.disconnect()
-    }
+    return () => observer.disconnect()
   }, [isLoading, error, items.length])
 
   // Sort 드롭다운 외부 클릭 닫기
@@ -199,7 +202,7 @@ const ExplorePageContent = () => {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  // 검색
+  // 검색 (URL만 변경하여 useEffect가 처리하게 유도)
   const handleSearch = useCallback(
     (q: string) => {
       isResetRef.current = true
